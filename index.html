@@ -198,7 +198,7 @@
   <div class="pb">
     <div class="wk">Week 16 · Apr 12–18, 2026 <span class="wkb">Confirmed</span></div>
     <div class="sbwrap" id="spark16"></div>
-    <table class="tbl" style="margin-bottom:12px">
+    <table id="routes-wk16" class="tbl" style="margin-bottom:12px">
       <thead><tr><th>Day</th><th>Date</th><th>BF</th><th>Brunch</th><th>Dinner</th><th>Bedtime</th><th>Total</th><th>Target</th></tr></thead>
       <tbody>
         <tr><td class="av">Sun</td><td>04/12</td><td class="tv">21</td><td class="av">27</td><td class="pv">22</td><td class="bv">25</td><td class="w1c">95</td><td class="dm">102</td></tr>
@@ -584,31 +584,187 @@ function tick() {
 }
 tick(); setInterval(tick,1000);
 
-// ── WK16 Sparkbar ──────────────────────────────────────
-const wk16=[{d:'Sun',r:95},{d:'Mon',r:102},{d:'Tue',r:101},{d:'Wed',r:97},{d:'Thu',r:106},{d:'Fri',r:107},{d:'Sat',r:109}];
-const wrap=document.getElementById('spark16');
-wk16.forEach(({d,r})=>{
-  const h=Math.round((r/115)*34);
-  const c=document.createElement('div'); c.className='sbc';
-  c.innerHTML=`<div class="sbv">${r}</div><div class="sbb" style="height:${h}px"></div><div class="sbd">${d}</div>`;
-  wrap.appendChild(c);
-});
+// ── Google Sheets live data layer ─────────────────────
+const SHEET_ID = '1vsrn1ZJKDKL9iztKeQKZacct9hY8RWZbTi0MQicBK0E';
 
-// ── Shift-level staffing threshold flags ───────────────
-const shiftData = [
-  {day:'Sun', date:'04/12', routes:{BF:21,BR:27,DI:22,BD:25}, staff:{BF:19,BR:31,DI:25,BD:25}},
-  {day:'Mon', date:'04/13', routes:{BF:25,BR:27,DI:24,BD:26}, staff:{BF:29,BR:37,DI:31,BD:33}},
-  {day:'Tue', date:'04/14', routes:{BF:23,BR:29,DI:24,BD:25}, staff:{BF:30,BR:44,DI:33,BD:33}},
-  {day:'Wed', date:'04/15', routes:{BF:21,BR:28,DI:23,BD:25}, staff:{BF:26,BR:40,DI:29,BD:28}},
-  {day:'Thu', date:'04/16', routes:{BF:24,BR:30,DI:26,BD:26}, staff:{BF:25,BR:36,DI:33,BD:24}},
-  {day:'Fri', date:'04/17', routes:{BF:24,BR:31,DI:26,BD:26}, staff:{BF:25,BR:37,DI:35,BD:24}},
-  {day:'Sat', date:'04/18', routes:{BF:26,BR:31,DI:26,BD:26}, staff:{BF:26,BR:36,DI:30,BD:26}},
-];
-const thresholds = {BF:1.00, BR:1.20, DI:1.10, BD:1.10};
-const shiftColors = {BF:'var(--w2)', BR:'var(--amber)', DI:'var(--purple)', BD:'var(--blue)'};
-const shiftLabels = {BF:'Breakfast', BR:'Brunch', DI:'Dinner', BD:'Bedtime'};
+function parseCSV(text) {
+  return text.trim().split('\n').map(row => {
+    const cells = []; let cur = ''; let inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const c = row[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
 
-function buildShiftGrid() {
+function findHeaderRow(rows) {
+  return rows.findIndex(r => r.some(c => c.toLowerCase().includes('day') || c.toLowerCase().includes('week')));
+}
+
+function colIndex(headers, ...names) {
+  for (const name of names) {
+    const i = headers.findIndex(h => h.toLowerCase().includes(name.toLowerCase()));
+    if (i !== -1) return i;
+  }
+  return -1;
+}
+
+// Thresholds for shift flags
+const THRESH = { BF: 1.00, BR: 1.20, DI: 1.10, BD: 1.10 };
+const SHIFT_LABELS = { BF: 'Breakfast', BR: 'Brunch', DI: 'Dinner', BD: 'Bedtime' };
+const SHIFT_COLORS = { BF: 'var(--w2)', BR: 'var(--amber)', DI: 'var(--purple)', BD: 'var(--blue)' };
+
+// ── Fetch and render ROUTES tab ────────────────────────
+async function loadRoutes() {
+  try {
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ROUTES`);
+    const text = await r.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = parseCSV(text);
+    const hi = findHeaderRow(rows);
+    if (hi === -1) return;
+    const headers = rows[hi];
+
+    // Map columns
+    const cDay = colIndex(headers, 'day');
+    const cDate = colIndex(headers, 'date');
+    const cBF = colIndex(headers, 'breakfast', 'bf');
+    const cBR = colIndex(headers, 'brunch', 'br');
+    const cDI = colIndex(headers, 'dinner', 'di');
+    const cBD = colIndex(headers, 'bedtime', 'evening', 'bd');
+    const cTotal = colIndex(headers, 'total');
+    const cTarget = colIndex(headers, 'target');
+
+    // Get WK16 data rows (rows after header that have day names)
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dataRows = rows.slice(hi + 1).filter(r => r[cDay] && days.includes(r[cDay]));
+
+    if (dataRows.length === 0) return;
+
+    // Update WK16 routes table
+    const tbody = document.querySelector('#routes-wk16 tbody');
+    if (tbody) {
+      tbody.innerHTML = dataRows.slice(0, 7).map(r => {
+        const total = parseInt(r[cTotal]) || 0;
+        const target = parseInt(r[cTarget]) || 102;
+        const tc = total >= target ? 'tv' : (total >= target * 0.95 ? 'av' : 'rv');
+        return `<tr>
+          <td class="av">${r[cDay]||''}</td>
+          <td>${r[cDate]||''}</td>
+          <td class="tv">${r[cBF]||''}</td>
+          <td class="av">${r[cBR]||''}</td>
+          <td class="pv">${r[cDI]||''}</td>
+          <td class="bv">${r[cBD]||''}</td>
+          <td class="${tc}">${total||''}</td>
+          <td class="dm">${target||''}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Update sparkbar
+    const wrap = document.getElementById('spark16');
+    if (wrap) {
+      wrap.innerHTML = '';
+      const totals = dataRows.slice(0,7).map(r => parseInt(r[cTotal])||0);
+      const mx = Math.max(...totals, 115);
+      totals.forEach((total, i) => {
+        const h = Math.round((total/mx)*34);
+        const day = dataRows[i]?.[cDay] || '';
+        const c = document.createElement('div'); c.className='sbc';
+        c.innerHTML = `<div class="sbv">${total}</div><div class="sbb" style="height:${h}px"></div><div class="sbd">${day}</div>`;
+        wrap.appendChild(c);
+      });
+    }
+
+    document.getElementById('sheet-status').style.color = 'var(--teal)';
+    document.getElementById('sheet-status').textContent = '✓ Live — refreshed ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    console.log('[HGTZ] Routes fetch failed:', e.message);
+  }
+}
+
+// ── Fetch and render STAFFING tab ──────────────────────
+async function loadStaffing() {
+  try {
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=STAFFING`);
+    const text = await r.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = parseCSV(text);
+    const hi = findHeaderRow(rows);
+    if (hi === -1) return;
+    const headers = rows[hi];
+
+    const cDay   = colIndex(headers, 'day');
+    const cDate  = colIndex(headers, 'date');
+    // Staff columns
+    const cBFst  = colIndex(headers, 'breakfast (staff)', 'bf staff', 'breakfast staff');
+    const cBRst  = colIndex(headers, 'brunch (staff)', 'br staff', 'brunch staff');
+    const cDIst  = colIndex(headers, 'dinner (staff)', 'di staff', 'dinner staff');
+    const cBDst  = colIndex(headers, 'bedtime (staff)', 'evening (staff)', 'bd staff', 'bedtime staff');
+    // Routes columns
+    const cBFrt  = colIndex(headers, 'breakfast (routes)', 'bf routes', 'breakfast routes');
+    const cBRrt  = colIndex(headers, 'brunch (routes)', 'br routes', 'brunch routes');
+    const cDIrt  = colIndex(headers, 'dinner (routes)', 'di routes', 'dinner routes');
+    const cBDrt  = colIndex(headers, 'bedtime (routes)', 'evening (routes)', 'bd routes', 'bedtime routes');
+
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dataRows = rows.slice(hi + 1).filter(r => r[cDay] && days.includes(r[cDay]));
+
+    if (dataRows.length === 0) return;
+
+    // Build shift data from sheet
+    const shiftData = dataRows.slice(0,7).map(r => ({
+      day: r[cDay],
+      date: r[cDate],
+      routes: {
+        BF: parseInt(r[cBFrt]) || 0,
+        BR: parseInt(r[cBRrt]) || 0,
+        DI: parseInt(r[cDIrt]) || 0,
+        BD: parseInt(r[cBDrt]) || 0
+      },
+      staff: {
+        BF: parseInt(r[cBFst]) || 0,
+        BR: parseInt(r[cBRst]) || 0,
+        DI: parseInt(r[cDIst]) || 0,
+        BD: parseInt(r[cBDst]) || 0
+      }
+    }));
+
+    renderShiftGrid(shiftData);
+  } catch(e) {
+    console.log('[HGTZ] Staffing fetch failed:', e.message);
+    // Fall back to hardcoded data
+    buildShiftGrid();
+  }
+}
+
+// ── Fetch and render FLEET tab ─────────────────────────
+async function loadFleet() {
+  try {
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=FLEET`);
+    const text = await r.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = parseCSV(text);
+    const hi = findHeaderRow(rows);
+    if (hi === -1) return;
+    const headers = rows[hi];
+    const cStatus = colIndex(headers, 'status', 'avail');
+    const dataRows = rows.slice(hi + 1).filter(r => r[0] && r[0].trim() !== '');
+    const total = dataRows.length;
+    const avail = dataRows.filter(r => (r[cStatus]||'').toLowerCase().includes('avail') || (r[cStatus]||'').toLowerCase() === 'available').length;
+    const down = total - avail;
+    // Update header stats
+    const fleetEl = document.querySelector('.hs-val[data-stat="fleet"]');
+    if (fleetEl) fleetEl.textContent = total;
+  } catch(e) { console.log('[HGTZ] Fleet fetch failed:', e.message); }
+}
+
+// ── Render shift grid (called with live or fallback data) ──
+function renderShiftGrid(shiftData) {
   const grid = document.getElementById('shift-grid');
   const flagList = document.getElementById('flag-list');
   if (!grid || !flagList) return;
@@ -616,27 +772,30 @@ function buildShiftGrid() {
   let gridHTML = '';
   let flags = [];
 
-  shiftData.forEach((d) => {
+  shiftData.forEach(d => {
     gridHTML += `<div style="display:grid;grid-template-columns:44px repeat(4,1fr);gap:2px;margin-bottom:2px">`;
     gridHTML += `<div style="font-size:10px;font-family:var(--mono);color:var(--w3);font-weight:300;padding:3px 2px;display:flex;flex-direction:column;justify-content:center">
       <div style="color:var(--w2)">${d.day}</div>
-      <div style="font-size:8px;color:var(--w4)">${d.date}</div>
+      <div style="font-size:8px;color:var(--w4)">${d.date||''}</div>
     </div>`;
 
     ['BF','BR','DI','BD'].forEach(shift => {
       const s = d.staff[shift];
       const r = d.routes[shift];
+      if (!r || r === 0) {
+        gridHTML += `<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:4px 3px;text-align:center">
+          <div style="font-size:11px;color:var(--w4);font-family:var(--mono)">—</div>
+        </div>`;
+        return;
+      }
       const ratio = s / r;
-      const thresh = thresholds[shift];
+      const thresh = THRESH[shift];
       const ok = ratio >= thresh;
       const pct = Math.round(ratio * 100);
-
-      if (!ok) flags.push({day:d.day, shift:shiftLabels[shift], s, r, pct, need:Math.round(thresh*100)});
-
+      if (!ok) flags.push({ day: d.day, shift: SHIFT_LABELS[shift], s, r, pct, need: Math.round(thresh * 100) });
       const bg = ok ? 'rgba(255,255,255,.03)' : 'rgba(248,113,113,.10)';
       const bdr = ok ? '1px solid rgba(255,255,255,.06)' : '1px solid rgba(248,113,113,.35)';
       const ratioColor = ok ? 'var(--teal)' : 'var(--red)';
-
       gridHTML += `<div style="background:${bg};border:${bdr};border-radius:4px;padding:4px 3px;text-align:center">
         <div style="font-size:12px;font-weight:500;font-family:var(--mono);color:${ratioColor};line-height:1">${pct}%</div>
         <div style="font-size:9px;font-family:var(--mono);color:var(--w3);margin-top:2px">${s}<span style="color:var(--w4)">/${r}</span></div>
@@ -648,117 +807,71 @@ function buildShiftGrid() {
 
   grid.innerHTML = gridHTML;
 
-  if (flags.length === 0) {
-    flagList.innerHTML = '<div style="font-size:10px;color:var(--teal);font-family:var(--mono);padding:3px 0">✓ All shifts meeting threshold this week</div>';
-  } else {
-    flagList.innerHTML = flags.map(f =>
-      `<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5">
+  flagList.innerHTML = flags.length === 0
+    ? '<div style="font-size:10px;color:var(--teal);font-family:var(--mono);padding:3px 0">✓ All shifts meeting threshold</div>'
+    : flags.map(f => `<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5">
         <span style="color:var(--amber);font-weight:500">${f.day} ${f.shift}</span>
         <span style="color:var(--w3)"> · ${f.s} staff / ${f.r} routes = </span>
         <span style="color:var(--red);font-weight:500">${f.pct}%</span>
         <span style="color:var(--w3)"> (need ${f.need}%)</span>
-      </div>`
-    ).join('');
+      </div>`).join('');
+}
+
+// ── Fallback hardcoded shift data (used if sheet unavailable) ──
+function buildShiftGrid() {
+  const fallback = [
+    {day:'Sun',date:'04/12',routes:{BF:21,BR:27,DI:22,BD:25},staff:{BF:19,BR:31,DI:25,BD:25}},
+    {day:'Mon',date:'04/13',routes:{BF:25,BR:27,DI:24,BD:26},staff:{BF:29,BR:37,DI:31,BD:33}},
+    {day:'Tue',date:'04/14',routes:{BF:23,BR:29,DI:24,BD:25},staff:{BF:30,BR:44,DI:33,BD:33}},
+    {day:'Wed',date:'04/15',routes:{BF:21,BR:28,DI:23,BD:25},staff:{BF:26,BR:40,DI:29,BD:28}},
+    {day:'Thu',date:'04/16',routes:{BF:24,BR:30,DI:26,BD:26},staff:{BF:25,BR:36,DI:33,BD:24}},
+    {day:'Fri',date:'04/17',routes:{BF:24,BR:31,DI:26,BD:26},staff:{BF:25,BR:37,DI:35,BD:24}},
+    {day:'Sat',date:'04/18',routes:{BF:26,BR:31,DI:26,BD:26},staff:{BF:26,BR:36,DI:30,BD:26}},
+  ];
+  renderShiftGrid(fallback);
+  // Also build sparkbar from fallback
+  const wrap = document.getElementById('spark16');
+  if (wrap && wrap.children.length === 0) {
+    const totals = [{d:'Sun',r:95},{d:'Mon',r:102},{d:'Tue',r:101},{d:'Wed',r:97},{d:'Thu',r:106},{d:'Fri',r:107},{d:'Sat',r:109}];
+    totals.forEach(({d,r}) => {
+      const h = Math.round((r/115)*34);
+      const c = document.createElement('div'); c.className='sbc';
+      c.innerHTML = `<div class="sbv">${r}</div><div class="sbb" style="height:${h}px"></div><div class="sbd">${d}</div>`;
+      wrap.appendChild(c);
+    });
   }
 }
 
-// Run after DOM is fully ready
-document.addEventListener('DOMContentLoaded', buildShiftGrid);
-// Fallback if DOM already loaded
-if (document.readyState !== 'loading') buildShiftGrid();
-
-// ── Google Sheets connector ────────────────────────────
-const TABS = { ROUTES:'ROUTES', STAFFING:'STAFFING', CLAIMS:'CLAIMS', FLEET:'FLEET', EMAILS:'EMAILS' };
-let SHEET_ID = localStorage.getItem('hgtz_sheet_id') || '1vsrn1ZJKDKL9iztKeQKZacct9hY8RWZbTi0MQicBK0E';
-if (SHEET_ID && document.getElementById('sheet-id')) {
-  document.getElementById('sheet-id').value = SHEET_ID;
-}
-window.addEventListener('load', () => { if (SHEET_ID) autoConnect(); });
-
+// ── Google Sheets connect button ───────────────────────
 function connectSheet() {
-  const id = document.getElementById('sheet-id').value.trim();
-  if (!id) { document.getElementById('sheet-status').textContent='Paste a Sheet ID first'; return; }
-  SHEET_ID = id;
-  localStorage.setItem('hgtz_sheet_id', id);
-  autoConnect();
+  const id = document.getElementById('sheet-id')?.value?.trim();
+  if (id) localStorage.setItem('hgtz_sheet_id', id);
+  loadAllSheetData();
 }
 
-async function autoConnect() {
-  const el = document.getElementById('sheet-status');
-  if (!el) return;
-  el.style.color='var(--amber)'; el.textContent='Connecting to Google Sheet…';
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ROUTES`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const text = await r.text();
-    if (text.trim().startsWith('<')) throw new Error('Sheet not public — publish it first');
-    el.style.color='var(--teal)'; el.textContent='✓ Sheet connected — data live';
-    updateFromSheet(text, 'ROUTES');
-  } catch(e) {
-    el.style.color='var(--red)'; el.textContent=`✗ ${e.message}`;
+// ── Load everything ────────────────────────────────────
+function loadAllSheetData() {
+  loadRoutes();
+  loadStaffing();
+  loadFleet();
+}
+
+// ── Run on page load ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildShiftGrid(); // render immediately with fallback
+  loadAllSheetData(); // then replace with live data
+  if (document.getElementById('sheet-id')) {
+    document.getElementById('sheet-id').value = SHEET_ID;
+  }
+});
+if (document.readyState !== 'loading') {
+  buildShiftGrid();
+  loadAllSheetData();
+  if (document.getElementById('sheet-id')) {
+    document.getElementById('sheet-id').value = SHEET_ID;
   }
 }
 
-function updateFromSheet(csv, tab) {
-  const rows = csv.split('\n').slice(1).map(r => r.split(',').map(c => c.replace(/^"|"$/g,'').trim()));
-  console.log(`[HGTZ] Loaded ${rows.length} rows from ${tab} tab`);
-}
-
-// ── Weather live fetch ─────────────────────────────────
-function wxIcon(code, precip) {
-  if (precip > 60) return '🌧';
-  if (precip > 30) return '🌦';
-  if (code <= 1) return '☀️';
-  if (code <= 3) return '⛅';
-  if (code <= 48) return '☁️';
-  if (code <= 67) return '🌧';
-  if (code <= 77) return '🌨';
-  return '🌧';
-}
-
-async function fetchWeather(lat, lon, tempId, condId, iconId, forecastId) {
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&daily=temperature_2m_max,precipitation_probability_max,weathercode&forecast_days=6&timezone=auto`;
-    const r = await fetch(url);
-    const d = await r.json();
-    const now = new Date();
-    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-    if (d.current_weather) {
-      const t = Math.round(d.current_weather.temperature);
-      const code = d.current_weather.weathercode;
-      const el = document.getElementById(tempId);
-      const ic = document.getElementById(iconId);
-      const co = document.getElementById(condId);
-      if (el) el.textContent = `${t}°F`;
-      if (ic) ic.textContent = wxIcon(code, 0);
-      if (co) {
-        const conds = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',51:'Light drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',80:'Rain showers',95:'Thunderstorm'};
-        co.textContent = conds[code] || 'Cloudy';
-      }
-    }
-
-    if (d.daily && forecastId) {
-      const fc = document.getElementById(forecastId);
-      if (fc) {
-        const rows = d.daily.time.slice(0,5).map((date, i) => {
-          const hi = Math.round(d.daily.temperature_2m_max[i]);
-          const pp = d.daily.precipitation_probability_max[i] || 0;
-          const wc = d.daily.weathercode[i];
-          const day = days[new Date(date+'T12:00:00').getDay()];
-          const lbl = i === 0 ? 'Today' : day;
-          return `<div class="wxr"><span class="wxd">${lbl}</span><span>${wxIcon(wc,pp)}</span><span class="wxh">${hi}°</span><span class="wxp">${pp}% rain</span></div>`;
-        }).join('');
-        fc.innerHTML = rows;
-      }
-    }
-  } catch(e) { console.log('Weather fetch failed:', e.message); }
-}
-
-fetchWeather(40.7128, -74.0060, 'nyc-temp', 'nyc-cond', 'nyc-icon', 'nyc-forecast');
-fetchWeather(41.8781, -87.6298, 'chi-temp', 'chi-cond', 'chi-icon', 'chi-forecast');
-fetchWeather(43.0389, -88.0373, 'mke-temp', 'mke-cond', 'mke-icon', 'mke-forecast');
 </script><script>
 // ── Clock ──────────────────────────────────────────────
 function tick() {
