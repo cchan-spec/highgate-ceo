@@ -23,33 +23,37 @@
 html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size:13px;min-height:100vh;line-height:1.5}
 
 /* ── HEADER ── */
-.hdr{background:var(--surf);border-bottom:1px solid var(--bdr);padding:10px 20px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:50}
-.brand-name{font-size:14px;font-weight:600;color:var(--w1)}
-.brand-sub{font-size:10px;font-weight:300;color:var(--w3);margin-top:1px;font-family:var(--mono);letter-spacing:.4px}
+.hdr{background:var(--surf);border-bottom:1px solid var(--bdr);padding:10px 16px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50}
+.brand-name{font-size:14px;font-weight:600;color:var(--w1);white-space:nowrap}
+.brand-sub{font-size:9px;font-weight:300;color:var(--w3);margin-top:1px;font-family:var(--mono);letter-spacing:.4px}
 .hdr-sep{width:1px;height:28px;background:var(--bdr);flex-shrink:0}
-.hdr-stats{flex:1;display:flex;gap:22px;align-items:center}
-.hs-item{display:flex;flex-direction:column;gap:1px}
-.hs-val{font-family:var(--mono);font-size:16px;font-weight:500;line-height:1}
-.hs-lbl{font-size:9px;font-weight:300;color:var(--w3);margin-top:2px;letter-spacing:.4px}
+.hdr-stats{flex:1;display:flex;gap:18px;align-items:center;overflow-x:auto}
+.hs-item{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.hs-val{font-family:var(--mono);font-size:15px;font-weight:500;line-height:1}
+.hs-lbl{font-size:8px;font-weight:300;color:var(--w3);margin-top:2px;letter-spacing:.4px;white-space:nowrap}
 .hdr-right{flex-shrink:0;text-align:right}
-.hdr-time{font-family:var(--mono);font-size:18px;font-weight:400;color:var(--w1)}
-.hdr-date{font-size:9px;color:var(--w3);font-weight:300;margin-top:2px;letter-spacing:.4px}
+.hdr-time{font-family:var(--mono);font-size:16px;font-weight:400;color:var(--w1)}
+.hdr-date{font-size:8px;color:var(--w3);font-weight:300;margin-top:2px;letter-spacing:.4px}
 .dot-live{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--teal);margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── LAYOUT ── */
-.main{display:grid;grid-template-rows:auto 1fr auto;gap:0;height:calc(100vh - 53px)}
+/* ── SECTIONS ── */
+.section{padding:12px 16px;border-bottom:1px solid var(--bdr)}
+.section-title{font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--w3);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chip{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;border:1px solid var(--bdr)}
+.chip-teal{border-color:var(--teal-d);color:var(--teal);background:var(--teal-m)}
+.chip-amber{border-color:var(--amb-d);color:var(--amber);background:var(--amb-m)}
 
-/* ── CALENDAR ROW (TOP) ── */
-.cal-row{background:var(--surf);border-bottom:1px solid var(--bdr);padding:12px 20px;display:flex;gap:8px;align-items:stretch;overflow-x:auto;min-height:0}
-.cal-day{flex-shrink:0;width:140px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--raised);padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+/* ── CALENDAR ── */
+.cal-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.cal-day{flex-shrink:0;width:140px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--raised);padding:8px 10px}
 .cal-day.today{border-color:rgba(77,217,184,.3);background:rgba(77,217,184,.05)}
-.cal-day-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.cal-day-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .cal-day-name{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase}
 .cal-day.today .cal-day-name{color:var(--teal)}
 .cal-day-num{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--w2)}
 .cal-day.today .cal-day-num{color:var(--teal);font-weight:600}
-.cal-evt{font-size:10px;color:var(--w2);padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.05);border-left:2px solid var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.cal-evt{font-size:10px;color:var(--w2);padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.05);border-left:2px solid var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;margin-bottom:2px}
 .cal-evt.amber{border-color:var(--amber);background:var(--amb-m)}
 .cal-evt.purple{border-color:var(--purple);background:var(--pur-m)}
 .cal-evt.red{border-color:var(--red);background:var(--red-m)}
@@ -57,38 +61,28 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 .cal-evt-time{font-size:8px;color:var(--w3);font-family:var(--mono)}
 .cal-empty{font-size:9px;color:var(--w4);font-style:italic}
 
-/* ── MIDDLE ROW ── */
-.mid-row{display:grid;grid-template-columns:1fr 300px;gap:0;overflow:hidden;min-height:0}
-
-/* ── STAFFING (LEFT) ── */
-.staffing-panel{overflow-y:auto;padding:14px 16px;border-right:1px solid var(--bdr)}
-.panel-title{font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--w3);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.panel-title span{flex:1}
-.chip{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;border:1px solid var(--bdr)}
-.chip-teal{border-color:var(--teal-d);color:var(--teal);background:var(--teal-m)}
-.chip-amber{border-color:var(--amb-d);color:var(--amber);background:var(--amb-m)}
-
+/* ── STAFFING ── */
 .shift-hdr{display:grid;grid-template-columns:50px repeat(4,1fr);gap:3px;margin-bottom:4px}
 .shift-col-lbl{font-size:9px;color:var(--w3);font-family:var(--mono);text-align:center;letter-spacing:.4px}
 .shift-col-lbl:first-child{text-align:left}
-
 #shift-grid{display:flex;flex-direction:column;gap:2px}
-
-.flags-title{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin:10px 0 5px;display:flex;align-items:center;gap:5px}
+.flags-title{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin:10px 0 5px}
 #flag-list{}
 
-/* ── WEATHER / RIGHT PANEL ── */
-.right-panel{overflow-y:auto;padding:14px 14px;display:flex;flex-direction:column;gap:10px;background:var(--raised)}
-
-.weather-card{border-radius:var(--rs);background:var(--surf);border:1px solid var(--bdr);padding:10px 12px}
-.wx-city{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:5px}
-.wx-row{display:flex;align-items:center;gap:8px}
-.wx-temp{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--w1);line-height:1}
+/* ── WEATHER ── */
+.wx-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.wx-card{border-radius:var(--rs);background:var(--raised);border:1px solid var(--bdr);padding:10px 12px}
+.wx-city{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:4px}
+.wx-temp{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--w1);line-height:1}
 .wx-desc{font-size:10px;color:var(--w2);margin-top:2px}
-.wx-detail{font-size:9px;color:var(--w3);font-family:var(--mono)}
+.wx-detail{font-size:9px;color:var(--w3);font-family:var(--mono);margin-top:1px}
 
-.claims-card{border-radius:var(--rs);background:var(--surf);border:1px solid var(--bdr);padding:10px 12px;flex:1}
-.claim-item{padding:6px 0;border-bottom:1px solid var(--bdr-s)}
+/* ── FLEET + CLAIMS row ── */
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.info-row{grid-template-columns:1fr}}
+.info-card{border-radius:var(--rs);background:var(--raised);border:1px solid var(--bdr);padding:10px 12px}
+.info-card-title{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:8px}
+.claim-item{padding:5px 0;border-bottom:1px solid var(--bdr-s)}
 .claim-item:last-child{border:none}
 .claim-id{font-family:var(--mono);font-size:9px;color:var(--amber)}
 .claim-name{font-size:10px;color:var(--w2);margin-top:1px}
@@ -96,10 +90,10 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 .claim-open{color:var(--red)}
 .claim-closed{color:var(--teal)}
 
-/* ── ROUTES (BOTTOM) ── */
-.routes-row{background:var(--surf);border-top:1px solid var(--bdr);padding:12px 20px;overflow-x:auto}
-.routes-inner{display:flex;gap:14px;align-items:flex-start}
-.routes-section{flex-shrink:0}
+/* ── ROUTES ── */
+.routes-scroll{overflow-x:auto}
+.routes-weeks{display:flex;gap:20px;min-width:max-content}
+.routes-week{flex-shrink:0}
 .routes-week-lbl{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .tbl{border-collapse:collapse;font-size:11px;font-family:var(--mono)}
 .tbl th{font-size:9px;font-weight:600;letter-spacing:.5px;color:var(--w3);text-transform:uppercase;padding:3px 8px;text-align:right;border-bottom:1px solid var(--bdr)}
@@ -107,7 +101,8 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 .tbl td{padding:3px 8px;text-align:right;border-bottom:1px solid var(--bdr-s)}
 .tbl td:first-child{text-align:left}
 .tbl tbody tr:hover{background:rgba(255,255,255,.02)}
-.tv{color:var(--teal)} .av{color:var(--amber)} .rv{color:var(--red)} .pv{color:var(--purple)} .bv{color:var(--blue)} .dm{color:var(--w3)}
+.tv{color:var(--teal)}.av{color:var(--amber)}.rv{color:var(--red)}.pv{color:var(--purple)}.bv{color:var(--blue)}.dm{color:var(--w3)}
+.week-divider{width:1px;background:var(--bdr);flex-shrink:0}
 
 /* sparkbar */
 .sbwrap{display:flex;gap:4px;align-items:flex-end;margin-bottom:8px;height:46px}
@@ -116,14 +111,10 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 .sbb{width:22px;background:var(--teal-d);border-radius:2px 2px 0 0;border-top:1px solid var(--teal);min-height:4px}
 .sbd{font-size:8px;color:var(--w3);font-family:var(--mono)}
 
-/* route vs routes divider */
-.routes-divider{width:1px;background:var(--bdr);flex-shrink:0;align-self:stretch}
-
-/* sheet status */
-.sheet-status-bar{background:var(--bg);border-top:1px solid var(--bdr);padding:4px 20px;display:flex;align-items:center;gap:12px}
+/* status bar */
+.status-bar{background:var(--bg);border-top:1px solid var(--bdr);padding:4px 16px;display:flex;align-items:center;gap:8px}
 #sheet-status{font-size:9px;font-family:var(--mono);color:var(--w3)}
 
-/* scrollbars */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
@@ -131,26 +122,17 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 </head>
 <body>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <div class="hdr">
   <div>
     <div class="brand-name">Highgate Logistics</div>
-    <div class="brand-sub">HGTZ · VNY1 · IRVINGTON NY</div>
+    <div class="brand-sub">HGTZ · VNY1</div>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-stats">
-    <div class="hs-item">
-      <div class="hs-val tv" id="hdr-routes">—</div>
-      <div class="hs-lbl">TODAY'S ROUTES</div>
-    </div>
-    <div class="hs-item">
-      <div class="hs-val av" id="hdr-staff">—</div>
-      <div class="hs-lbl">STAFF SCHEDULED</div>
-    </div>
-    <div class="hs-item">
-      <div class="hs-val" id="hdr-flags">—</div>
-      <div class="hs-lbl">SHIFT FLAGS</div>
-    </div>
+    <div class="hs-item"><div class="hs-val tv" id="hdr-routes">—</div><div class="hs-lbl">TODAY'S ROUTES</div></div>
+    <div class="hs-item"><div class="hs-val av" id="hdr-staff">—</div><div class="hs-lbl">STAFF TODAY</div></div>
+    <div class="hs-item"><div class="hs-val" id="hdr-flags">—</div><div class="hs-lbl">SHIFT FLAGS</div></div>
   </div>
   <div class="hdr-right">
     <div class="hdr-time" id="hdr-clock">--:--</div>
@@ -158,81 +140,95 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
   </div>
 </div>
 
-<div class="main">
+<!-- CALENDAR -->
+<div class="section">
+  <div class="section-title"><span>This Week</span><span class="chip chip-teal">Live</span></div>
+  <div class="cal-row" id="cal-row"></div>
+</div>
 
-  <!-- ── CALENDAR ROW (TOP) ── -->
-  <div class="cal-row" id="cal-row">
-    <!-- Populated by JS -->
+<!-- STAFFING -->
+<div class="section">
+  <div class="section-title"><span>Staffing vs Routes</span><span class="chip chip-teal">DSP Workplace</span><span class="chip chip-amber">WK16</span></div>
+  <div class="shift-hdr">
+    <div class="shift-col-lbl">Day</div>
+    <div class="shift-col-lbl">BF</div>
+    <div class="shift-col-lbl">Brunch</div>
+    <div class="shift-col-lbl">Dinner</div>
+    <div class="shift-col-lbl">Bedtime</div>
   </div>
+  <div id="shift-grid"></div>
+  <div class="flags-title">⚠ Shift Flags</div>
+  <div id="flag-list"></div>
+</div>
 
-  <!-- ── MIDDLE ROW ── -->
-  <div class="mid-row">
-
-    <!-- ── STAFFING (LEFT) ── -->
-    <div class="staffing-panel">
-      <div class="panel-title">
-        <span>Staffing vs Routes</span>
-        <span class="chip chip-teal">DSP Workplace</span>
-        <span class="chip chip-amber">WK16</span>
-      </div>
-      <div class="shift-hdr">
-        <div class="shift-col-lbl">Day</div>
-        <div class="shift-col-lbl">BF</div>
-        <div class="shift-col-lbl">Brunch</div>
-        <div class="shift-col-lbl">Dinner</div>
-        <div class="shift-col-lbl">Bedtime</div>
-      </div>
-      <div id="shift-grid"></div>
-      <div class="flags-title">
-        <span>⚠ Shift Flags</span>
-      </div>
-      <div id="flag-list"></div>
+<!-- WEATHER -->
+<div class="section">
+  <div class="section-title"><span>Weather</span><span class="chip chip-teal">Live</span></div>
+  <div class="wx-row">
+    <div class="wx-card">
+      <div class="wx-city">New York</div>
+      <div class="wx-temp" id="wx-nyc-t">—°</div>
+      <div class="wx-desc" id="wx-nyc-d">…</div>
+      <div class="wx-detail" id="wx-nyc-x"></div>
     </div>
+    <div class="wx-card">
+      <div class="wx-city">Chicago</div>
+      <div class="wx-temp" id="wx-chi-t">—°</div>
+      <div class="wx-desc" id="wx-chi-d">…</div>
+      <div class="wx-detail" id="wx-chi-x"></div>
+    </div>
+    <div class="wx-card">
+      <div class="wx-city">Milwaukee</div>
+      <div class="wx-temp" id="wx-mil-t">—°</div>
+      <div class="wx-desc" id="wx-mil-d">…</div>
+      <div class="wx-detail" id="wx-mil-x"></div>
+    </div>
+  </div>
+</div>
 
-    <!-- ── RIGHT PANEL: Weather + Claims ── -->
-    <div class="right-panel">
-      <div class="panel-title" style="margin-bottom:6px">
-        <span>Weather</span>
-        <span class="chip chip-teal">Live</span>
+<!-- FLEET + CLAIMS -->
+<div class="section">
+  <div class="info-row">
+    <div class="info-card">
+      <div class="info-card-title">Fleet <span class="chip chip-teal" style="margin-left:4px">Papaya</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal)" id="fleet-total">—</div><div style="font-size:9px;color:var(--w3)">TOTAL BIKES</div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--red)" id="fleet-down">—</div><div style="font-size:9px;color:var(--w3)">DOWN</div></div>
       </div>
-      <div class="claims-card" id="fleet-card">
-        <div class="panel-title" style="margin-bottom:8px">
-          <span>Fleet</span>
-          <span class="chip chip-teal">Papaya</span>
-        </div>
-        <div id="fleet-content">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <div>
-              <div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal)" id="fleet-total">—</div>
-              <div style="font-size:9px;color:var(--w3);letter-spacing:.4px">TOTAL BIKES</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--red)" id="fleet-down">—</div>
-              <div style="font-size:9px;color:var(--w3);letter-spacing:.4px">DOWN / SERVICE</div>
-            </div>
-          </div>
-          <div id="fleet-bar" style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:6px">
-            <div id="fleet-bar-fill" style="height:100%;background:var(--teal);width:0%;transition:width .5s;border-radius:2px"></div>
-          </div>
-          <div id="fleet-list" style="font-size:10px;color:var(--w3);font-family:var(--mono)">Loading…</div>
-        </div>
+      <div style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:6px">
+        <div id="fleet-bar-fill" style="height:100%;background:var(--teal);width:0%;transition:width .5s;border-radius:2px"></div>
+      </div>
+      <div id="fleet-list" style="font-size:10px;color:var(--w3);font-family:var(--mono)">Connect Papaya Dash</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Claims</div>
+      <div class="claim-item">
+        <div class="claim-id">XC-ORCA-26-00515</div>
+        <div class="claim-name">Derek Barnes</div>
+        <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
+      </div>
+      <div class="claim-item">
+        <div class="claim-id">XC-ORCA-25-05451</div>
+        <div class="claim-name">Jennifer Yancey</div>
+        <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
       </div>
     </div>
+  </div>
+</div>
 
-  </div><!-- end mid-row -->
-
-  <!-- ── ROUTES ROW (BOTTOM) ── -->
-  <div class="routes-row">
-    <div class="routes-inner">
-      <div class="routes-section">
-        <div class="routes-week-lbl">
-          Trend
-          <span class="chip chip-teal">WK16</span>
-        </div>
+<!-- ROUTES -->
+<div class="section">
+  <div class="section-title"><span>Route Commitments</span><span class="chip chip-teal">Amazon Portal</span></div>
+  <div class="routes-scroll">
+    <div class="routes-weeks">
+      <!-- Sparkbar -->
+      <div class="routes-week">
+        <div class="routes-week-lbl">WK16 Trend</div>
         <div class="sbwrap" id="spark16"></div>
       </div>
-      <div class="routes-divider"></div>
-      <div class="routes-section">
+      <div class="week-divider"></div>
+      <!-- WK16 -->
+      <div class="routes-week">
         <div class="routes-week-lbl">WK16 <span style="color:var(--w4);font-weight:300">Apr 12–18</span> <span class="chip chip-teal">Target 102</span></div>
         <table id="routes-wk16" class="tbl">
           <thead><tr><th>Day</th><th>Date</th><th class="tv">BF</th><th class="av">Brunch</th><th class="pv">Din</th><th class="bv">Eve</th><th>Tot</th></tr></thead>
@@ -247,8 +243,9 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
           </tbody>
         </table>
       </div>
-      <div class="routes-divider"></div>
-      <div class="routes-section">
+      <div class="week-divider"></div>
+      <!-- WK17 -->
+      <div class="routes-week">
         <div class="routes-week-lbl">WK17 <span style="color:var(--w4);font-weight:300">Apr 19–25</span> <span class="chip chip-amber">Target 100</span></div>
         <table class="tbl">
           <thead><tr><th>Day</th><th>Date</th><th class="tv">BF</th><th class="av">Brunch</th><th class="pv">Din</th><th class="bv">Eve</th><th>Tot</th></tr></thead>
@@ -263,8 +260,9 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
           </tbody>
         </table>
       </div>
-      <div class="routes-divider"></div>
-      <div class="routes-section">
+      <div class="week-divider"></div>
+      <!-- WK18 -->
+      <div class="routes-week">
         <div class="routes-week-lbl">WK18 <span style="color:var(--w4);font-weight:300">Apr 26–May 2</span> <span class="chip chip-amber">Target 100</span></div>
         <table class="tbl">
           <thead><tr><th>Day</th><th>Date</th><th class="tv">BF</th><th class="av">Brunch</th><th class="pv">Din</th><th class="bv">Eve</th><th>Tot</th></tr></thead>
@@ -281,254 +279,151 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
       </div>
     </div>
   </div>
+</div>
 
-</div><!-- end main -->
-
-<!-- sheet status -->
-<div class="sheet-status-bar">
+<!-- STATUS BAR -->
+<div class="status-bar">
   <span class="dot-live"></span>
-  <span id="sheet-status">Connecting to Google Sheet…</span>
+  <span id="sheet-status">Connecting…</span>
 </div>
 
 <script>
-// ── Clock ─────────────────────────────────────
+// ── Clock ──────────────────────────────────────
 function updateClock() {
   const now = new Date();
-  document.getElementById('hdr-clock').textContent =
-    now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  document.getElementById('hdr-date').textContent =
-    now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+  document.getElementById('hdr-clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  document.getElementById('hdr-date').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
 }
-updateClock(); setInterval(updateClock, 1000);
+updateClock(); setInterval(updateClock,1000);
 
 // ── Calendar ──────────────────────────────────
-const CALENDAR_EVENTS = [
-  // Tue Apr 14
-  {date:'2026-04-14',title:'🚴 Operations Visit',time:'8:00 AM',color:'teal'},
-  {date:'2026-04-14',title:'DSP Preventative Maintenance',time:'9:30 AM',color:'amber'},
-  {date:'2026-04-14',title:'DAFT/DEFT Scorecard Hours',time:'12:00 PM',color:'amber'},
-  {date:'2026-04-14',title:'Eminae Virtual Roundtable',time:'12:00 PM',color:'purple'},
-  {date:'2026-04-14',title:'Eminae Micro Mixer NJ',time:'5:30 PM',color:'purple'},
-  // Wed Apr 15
-  {date:'2026-04-15',title:'Weekly DSP Roundtable',time:'11:30 AM',color:'amber'},
-  {date:'2026-04-15',title:'📞 Meetings Block',time:'1:00 PM',color:'amber'},
-  {date:'2026-04-15',title:'IKEA Metrics Review',time:'3:00 PM',color:'teal'},
-  // Thu Apr 16
-  {date:'2026-04-16',title:'🧭 Strategy',time:'8:00 AM',color:'purple'},
-  {date:'2026-04-16',title:'Next Week Schedule Review',time:'11:00 AM',color:'amber'},
-  {date:'2026-04-16',title:'🚴 In the Operation',time:'1:00 PM',color:'teal'},
-  // Fri Apr 17
-  {date:'2026-04-17',title:'🟢 Recovery Day — BLOCKED',time:'All Day',color:'teal'},
-  {date:'2026-04-17',title:'therapy',time:'10:00 AM',color:'blue'},
-  {date:'2026-04-17',title:'NY Delivers Coalition Call',time:'2:00 PM',color:'amber'},
-  // Sat Apr 18
-  {date:'2026-04-18',title:'🏃 Track: Rye Relays',time:'All Day',color:'purple'},
-  {date:'2026-04-18',title:'👦 Son + Warehouse + Lunch',time:'9:00 AM',color:'amber'},
-  {date:'2026-04-18',title:'Kids bday party',time:'3:00 PM',color:'red'},
-  // Sun Apr 19
-  {date:'2026-04-19',title:'👨‍👩‍👧‍👦 Family Day — BLOCKED',time:'All Day',color:'amber'},
-  // Mon Apr 20
-  {date:'2026-04-20',title:'✏️ Timecard Edits',time:'6:00 AM',color:'teal'},
-  {date:'2026-04-20',title:'Camilo + Christine Payroll',time:'12:00 PM',color:'teal'},
-  {date:'2026-04-20',title:'Ultrasound Biopsy',time:'1:50 PM',color:'red'},
-];
+const CAL_API_URL = 'https://script.google.com/macros/s/AKfycbz380G6sm-qLAnH_nVbS9Qdqv8cMdpGwS0fEnEbiVfx9RK7lVr6ket1GISVXkxSmSTblg/exec';
 
-function buildCalendar() {
-  const today = new Date();
-  today.setHours(0,0,0,0);
+function buildCalendarShell() {
+  const today = new Date(); today.setHours(0,0,0,0);
   const container = document.getElementById('cal-row');
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    days.push(d);
-  }
   const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  container.innerHTML = days.map(d => {
+  container.innerHTML = Array.from({length:7},(_,i)=>{
+    const d = new Date(today); d.setDate(today.getDate()+i);
     const iso = d.toISOString().split('T')[0];
-    const isToday = d.getTime() === today.getTime();
-    const evts = CALENDAR_EVENTS.filter(e => e.date === iso);
-    const evtHtml = evts.length === 0
-      ? '<div class="cal-empty">clear</div>'
-      : evts.slice(0,3).map(e =>
-          `<div class="cal-evt ${e.color}">
-            <div class="cal-evt-time">${e.time}</div>
-            ${e.title}
-          </div>`
-        ).join('') + (evts.length > 3 ? `<div class="cal-empty">+${evts.length-3} more</div>` : '');
-    return `<div class="cal-day${isToday ? ' today' : ''}">
+    const isToday = i===0;
+    return `<div class="cal-day${isToday?' today':''}" id="cal-day-${iso}">
       <div class="cal-day-hdr">
         <div class="cal-day-name">${dayNames[d.getDay()]}</div>
         <div class="cal-day-num">${d.getDate()}</div>
       </div>
-      ${evtHtml}
+      <div class="cal-empty">loading…</div>
     </div>`;
   }).join('');
 }
-buildCalendar();
+
+async function loadCalendar() {
+  buildCalendarShell();
+  try {
+    const r = await fetch(CAL_API_URL, {redirect:'follow'});
+    const events = await r.json();
+    if (!Array.isArray(events)) throw new Error('bad response');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const byDate = {};
+    events.forEach(ev => {
+      const date = ev.allDay ? ev.start.split('T')[0] : new Date(ev.start).toISOString().split('T')[0];
+      if (!byDate[date]) byDate[date] = [];
+      const time = ev.allDay ? 'All Day' : new Date(ev.start).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      byDate[date].push({title:ev.title,time,color:ev.color||'teal'});
+    });
+    for (let i=0;i<7;i++) {
+      const d = new Date(today); d.setDate(today.getDate()+i);
+      const iso = d.toISOString().split('T')[0];
+      const el = document.getElementById('cal-day-'+iso);
+      if (!el) continue;
+      const evts = byDate[iso]||[];
+      const evtHtml = evts.length===0
+        ? '<div class="cal-empty">clear</div>'
+        : evts.slice(0,3).map(e=>`<div class="cal-evt ${e.color}"><div class="cal-evt-time">${e.time}</div>${e.title}</div>`).join('')
+          + (evts.length>3?`<div class="cal-empty">+${evts.length-3} more</div>`:'');
+      el.querySelector('.cal-empty').outerHTML = evtHtml;
+    }
+  } catch(e) {
+    document.querySelectorAll('.cal-empty').forEach(el=>{ if(el.textContent==='loading…') el.textContent=''; });
+  }
+}
+loadCalendar();
 
 // ── Weather ───────────────────────────────────
-const WX_CODES = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',48:'Icy Fog',51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',75:'Heavy Snow',80:'Showers',81:'Heavy Showers',95:'Thunderstorm',96:'Thunderstorm + Hail'};
-async function loadWeather(lat, lon, tempId, descId, detailId) {
+const WX = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',51:'Light Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',80:'Showers',95:'Thunderstorm'};
+async function loadWx(lat,lon,tid,did,xid) {
   try {
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation_probability,windspeed_10m&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`);
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`);
     const d = await r.json();
     const cw = d.current_weather;
-    document.getElementById(tempId).textContent = Math.round(cw.temperature) + '°F';
-    document.getElementById(descId).textContent = WX_CODES[cw.weathercode] || 'Unknown';
-    document.getElementById(detailId).textContent = `Wind ${Math.round(cw.windspeed)} mph`;
-  } catch(e) { document.getElementById(descId).textContent = 'Unavailable'; }
+    document.getElementById(tid).textContent = Math.round(cw.temperature)+'°F';
+    document.getElementById(did).textContent = WX[cw.weathercode]||'';
+    document.getElementById(xid).textContent = 'Wind '+Math.round(cw.windspeed)+' mph';
+  } catch(e) { document.getElementById(did).textContent='Unavailable'; }
 }
-loadWeather(40.7128,-74.0060,'wx-nyc-t','wx-nyc-d','wx-nyc-x');
-loadWeather(41.8781,-87.6298,'wx-chi-t','wx-chi-d','wx-chi-x');
-loadWeather(43.0389,-87.9065,'wx-mil-t','wx-mil-d','wx-mil-x');
+loadWx(40.7128,-74.0060,'wx-nyc-t','wx-nyc-d','wx-nyc-x');
+loadWx(41.8781,-87.6298,'wx-chi-t','wx-chi-d','wx-chi-x');
+loadWx(43.0389,-87.9065,'wx-mil-t','wx-mil-d','wx-mil-x');
 
 // ── Sheet data ────────────────────────────────
-const SHEET_ID = '1vsrn1ZJKDKL9iztKeQKZacct9hY8RWZbTi0MQicBK0E';
 const PUBLISH_ID = '2PACX-1vS-8gcbLZ2mjG2JhVeOiPo5KE6NzkA7a9dDTWNleqT-HOjP_OOo4u29L34BwUTCQRh9h_6tIEcNs2pi';
-const PUB_GIDS = { ROUTES: '152171827', STAFFING: '500069851', FLEET: '1684306583', CLAIMS: '123206791' };
-function pubUrl(tab) { return `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pub?output=csv&gid=${PUB_GIDS[tab]}`; }
+const PUB_GIDS = {ROUTES:'152171827',STAFFING:'500069851',FLEET:'1684306583'};
+function pubUrl(tab){return `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pub?output=csv&gid=${PUB_GIDS[tab]}`;}
 
-function parseCSV(text) {
-  return text.trim().split('\n').map(row => {
-    const cells = []; let cur = ''; let inQ = false;
-    for (let i = 0; i < row.length; i++) {
-      const c = row[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
-      else cur += c;
-    }
-    cells.push(cur.trim()); return cells;
+function parseCSV(text){
+  return text.trim().split('\n').map(row=>{
+    const cells=[];let cur='';let inQ=false;
+    for(let c of row){if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){cells.push(cur.trim());cur='';}else cur+=c;}
+    cells.push(cur.trim());return cells;
   });
 }
 
-const THRESH = { BF:1.00, BR:1.20, DI:1.10, BD:1.10 };
-const SHIFT_LABELS = { BF:'Breakfast', BR:'Brunch', DI:'Dinner', BD:'Bedtime' };
+const THRESH={BF:1.00,BR:1.20,DI:1.10,BD:1.10};
+const SHIFT_LABELS={BF:'Breakfast',BR:'Brunch',DI:'Dinner',BD:'Bedtime'};
 
-async function loadStaffing() {
-  try {
-    const r = await fetch(pubUrl('STAFFING'));
-    const text = await r.text();
-    if (text.trim().startsWith('<')) throw new Error('Not published');
-    const rows = parseCSV(text);
-    const hi = rows.findIndex(r => r.some(c => /day|date/i.test(c)));
-    if (hi === -1) return buildShiftGrid();
-    const headers = rows[hi];
-    const ci = (n) => headers.findIndex(h => h.toLowerCase().includes(n.toLowerCase()));
-    const cDay=ci('day'), cDate=ci('date');
-    const cBFst=ci('breakfast (staff)'), cBRst=ci('brunch (staff)'), cDIst=ci('dinner (staff)'), cBDst=ci('bedtime (staff)');
-    const cBFrt=ci('breakfast (routes)'), cBRrt=ci('brunch (routes)'), cDIrt=ci('dinner (routes)'), cBDrt=ci('bedtime (routes)');
-    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const dataRows = rows.slice(hi+1).filter(r => r[cDay] && days.includes(r[cDay]));
-    if (!dataRows.length) return buildShiftGrid();
-    const shiftData = dataRows.slice(0,7).map(r => ({
-      day: r[cDay], date: r[cDate],
-      routes: { BF:parseInt(r[cBFrt])||0, BR:parseInt(r[cBRrt])||0, DI:parseInt(r[cDIrt])||0, BD:parseInt(r[cBDrt])||0 },
-      staff: { BF:parseInt(r[cBFst])||0, BR:parseInt(r[cBRst])||0, DI:parseInt(r[cDIst])||0, BD:parseInt(r[cBDst])||0 }
-    }));
-    renderShiftGrid(shiftData);
-    document.getElementById('sheet-status').style.color='var(--teal)';
-    document.getElementById('sheet-status').textContent='✓ Live — refreshed '+new Date().toLocaleTimeString();
-  } catch(e) { buildShiftGrid(); }
-}
-
-async function loadRoutes() {
-  try {
-    const r = await fetch(pubUrl('ROUTES'));
-    const text = await r.text();
-    if (text.trim().startsWith('<')) return;
-    const rows = parseCSV(text);
-    const hi = rows.findIndex(r => r.some(c => /day|date/i.test(c)));
-    if (hi === -1) return;
-    const headers = rows[hi];
-    const ci = (n) => headers.findIndex(h => h.toLowerCase().includes(n.toLowerCase()));
-    const cDay=ci('day'),cDate=ci('date'),cBF=ci('breakfast'),cBR=ci('brunch'),cDI=ci('dinner'),cBD=ci('bedtime'),cTotal=ci('total'),cTarget=ci('target');
-    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const dataRows = rows.slice(hi+1).filter(r=>r[cDay]&&days.includes(r[cDay]));
-    if (!dataRows.length) return;
-    const tbody=document.querySelector('#routes-wk16 tbody');
-    if(tbody) tbody.innerHTML=dataRows.slice(0,7).map(r=>{
-      const total=parseInt(r[cTotal])||0,target=parseInt(r[cTarget])||102;
-      const tc=total>=target?'tv':(total>=target*.95?'av':'rv');
-      return `<tr><td class="av">${r[cDay]}</td><td>${r[cDate]}</td><td class="tv">${r[cBF]}</td><td class="av">${r[cBR]}</td><td class="pv">${r[cDI]}</td><td class="bv">${r[cBD]}</td><td class="${tc}">${total}</td><td class="dm">${target}</td></tr>`;
-    }).join('');
-    // Sparkbar
-    const wrap=document.getElementById('spark16');
-    if(wrap){
-      wrap.innerHTML='';
-      const totals=dataRows.slice(0,7).map(r=>({d:r[cDay]||'',t:parseInt(r[cTotal])||0}));
-      const mx=Math.max(...totals.map(x=>x.t),115);
-      totals.forEach(({d,t})=>{
-        const h=Math.round((t/mx)*34);
-        const el=document.createElement('div');el.className='sbc';
-        el.innerHTML=`<div class="sbv">${t}</div><div class="sbb" style="height:${h}px"></div><div class="sbd">${d}</div>`;
-        wrap.appendChild(el);
-      });
-    }
-  } catch(e){}
-}
-
-function renderShiftGrid(shiftData) {
+function renderShiftGrid(shiftData){
   const grid=document.getElementById('shift-grid');
   const flagList=document.getElementById('flag-list');
-  if(!grid||!flagList) return;
-  let gridHTML='', flags=[], totalStaff=0, todayRoutes=0;
-  const today=new Date().toLocaleDateString('en-US',{weekday:'short'}).substring(0,3);
+  let html='',flags=[],todayStaff=0,todayRoutes=0;
+  const todayName=new Date().toLocaleDateString('en-US',{weekday:'short'}).substring(0,3);
   shiftData.forEach(d=>{
-    const isToday=d.day===today;
-    if(isToday){
-      totalStaff=d.staff.BF+d.staff.BR+d.staff.DI+d.staff.BD;
-      todayRoutes=d.routes.BF+d.routes.BR+d.routes.DI+d.routes.BD;
-    }
-    gridHTML+=`<div style="display:grid;grid-template-columns:50px repeat(4,1fr);gap:2px;margin-bottom:2px;${isToday?'background:rgba(77,217,184,.04);border-radius:4px;':''}">`;
-    gridHTML+=`<div style="font-size:10px;font-family:var(--mono);color:${isToday?'var(--teal)':'var(--w3)'};font-weight:${isToday?'600':'300'};padding:3px 2px;display:flex;flex-direction:column;justify-content:center"><div>${d.day}</div><div style="font-size:8px;color:var(--w4)">${d.date||''}</div></div>`;
+    const isToday=d.day===todayName;
+    if(isToday){todayStaff=d.staff.BF+d.staff.BR+d.staff.DI+d.staff.BD;todayRoutes=d.routes.BF+d.routes.BR+d.routes.DI+d.routes.BD;}
+    html+=`<div style="display:grid;grid-template-columns:50px repeat(4,1fr);gap:2px;margin-bottom:2px;${isToday?'background:rgba(77,217,184,.04);border-radius:4px;':''}">`;
+    html+=`<div style="font-size:10px;font-family:var(--mono);color:${isToday?'var(--teal)':'var(--w3)'};font-weight:${isToday?'600':'300'};padding:3px 2px;display:flex;flex-direction:column;justify-content:center"><div>${d.day}</div><div style="font-size:8px;color:var(--w4)">${d.date||''}</div></div>`;
     ['BF','BR','DI','BD'].forEach(shift=>{
       const s=d.staff[shift],r=d.routes[shift];
-      if(!r){
-        gridHTML+=`<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:4px 3px;text-align:center"><div style="font-size:11px;color:var(--w4);font-family:var(--mono)">—</div></div>`;
-        return;
-      }
-      const ratio=s/r, thresh=THRESH[shift], ok=ratio>=thresh;
-      const pct=Math.round(ratio*100);
-      if(!ok) flags.push({day:d.day,shift:SHIFT_LABELS[shift],s,r,pct,need:Math.round(thresh*100)});
-      const bg=ok?'rgba(255,255,255,.03)':'rgba(248,113,113,.10)';
-      const bdr=ok?'1px solid rgba(255,255,255,.06)':'1px solid rgba(248,113,113,.35)';
-      gridHTML+=`<div style="background:${bg};border:${bdr};border-radius:4px;padding:4px 3px;text-align:center">
+      if(!r){html+=`<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:4px 3px;text-align:center"><div style="font-size:11px;color:var(--w4);font-family:var(--mono)">—</div></div>`;return;}
+      const ratio=s/r,thresh=THRESH[shift],ok=ratio>=thresh,pct=Math.round(ratio*100);
+      if(!ok)flags.push({day:d.day,shift:SHIFT_LABELS[shift],s,r,pct,need:Math.round(thresh*100)});
+      html+=`<div style="background:${ok?'rgba(255,255,255,.03)':'rgba(248,113,113,.10)'};border:${ok?'1px solid rgba(255,255,255,.06)':'1px solid rgba(248,113,113,.35)'};border-radius:4px;padding:4px 3px;text-align:center">
         <div style="font-size:12px;font-weight:500;font-family:var(--mono);color:${ok?'var(--teal)':'var(--red)'};line-height:1">${pct}%</div>
         <div style="font-size:9px;font-family:var(--mono);color:var(--w3);margin-top:2px">${s}<span style="color:var(--w4)">/${r}</span></div>
         ${!ok?'<div style="font-size:8px;color:var(--red)">⚠</div>':'<div style="font-size:8px;color:transparent">·</div>'}
       </div>`;
     });
-    gridHTML+=`</div>`;
+    html+='</div>';
   });
-  grid.innerHTML=gridHTML;
+  grid.innerHTML=html;
   flagList.innerHTML=flags.length===0
     ?'<div style="font-size:10px;color:var(--teal);font-family:var(--mono);padding:3px 0">✓ All shifts meeting threshold</div>'
-    :flags.map(f=>`<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5">
-        <span style="color:var(--amber);font-weight:500">${f.day} ${f.shift}</span>
-        <span style="color:var(--w3)"> · ${f.s}/${f.r} = </span>
-        <span style="color:var(--red);font-weight:500">${f.pct}%</span>
-        <span style="color:var(--w3)"> (need ${f.need}%)</span>
-      </div>`).join('');
-  // update header
+    :flags.map(f=>`<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5"><span style="color:var(--amber);font-weight:500">${f.day} ${f.shift}</span><span style="color:var(--w3)"> · ${f.s}/${f.r} = </span><span style="color:var(--red);font-weight:500">${f.pct}%</span><span style="color:var(--w3)"> (need ${f.need}%)</span></div>`).join('');
   document.getElementById('hdr-flags').textContent=flags.length;
   document.getElementById('hdr-flags').style.color=flags.length>0?'var(--red)':'var(--teal)';
-  if(totalStaff) document.getElementById('hdr-staff').textContent=totalStaff;
+  if(todayStaff) document.getElementById('hdr-staff').textContent=todayStaff;
   if(todayRoutes) document.getElementById('hdr-routes').textContent=todayRoutes;
 }
 
-function buildShiftGrid() {
-  const fallback=[
+function buildFallbackGrid(){
+  renderShiftGrid([
     {day:'Tue',date:'04/14',routes:{BF:23,BR:29,DI:24,BD:25},staff:{BF:30,BR:44,DI:34,BD:35}},
     {day:'Wed',date:'04/15',routes:{BF:21,BR:28,DI:23,BD:25},staff:{BF:27,BR:41,DI:30,BD:33}},
     {day:'Thu',date:'04/16',routes:{BF:24,BR:30,DI:26,BD:26},staff:{BF:26,BR:36,DI:33,BD:31}},
     {day:'Fri',date:'04/17',routes:{BF:24,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:36,BD:29}},
     {day:'Sat',date:'04/18',routes:{BF:26,BR:31,DI:26,BD:26},staff:{BF:28,BR:34,DI:31,BD:32}},
-  ];
-  renderShiftGrid(fallback);
-  // Sparkbar fallback
+  ]);
   const wrap=document.getElementById('spark16');
-  if(wrap&&wrap.children.length===0){
+  if(wrap&&!wrap.children.length){
     [{d:'Sun',t:95},{d:'Mon',t:102},{d:'Tue',t:101},{d:'Wed',t:97},{d:'Thu',t:106},{d:'Fri',t:107},{d:'Sat',t:109}].forEach(({d,t})=>{
       const h=Math.round((t/115)*34);
       const el=document.createElement('div');el.className='sbc';
@@ -538,74 +433,62 @@ function buildShiftGrid() {
   }
 }
 
-// ── Fleet ─────────────────────────────────────
-async function loadFleet() {
+async function loadStaffing(){
   try {
-    const r = await fetch(pubUrl('FLEET'));
-    const text = await r.text();
-    if (text.trim().startsWith('<')) return;
-    const rows = parseCSV(text);
-    const hi = rows.findIndex(r => r.some(c => /vehicle|bike|unit|status/i.test(c)));
-    if (hi === -1) return;
-    const headers = rows[hi];
-    const ci = (n) => headers.findIndex(h => h.toLowerCase().includes(n.toLowerCase()));
-    const cStatus = ci('status');
-    const cUnit = ci('unit') !== -1 ? ci('unit') : ci('vehicle') !== -1 ? ci('vehicle') : 0;
-    const dataRows = rows.slice(hi+1).filter(r => r[0] && r[0].trim() !== '');
-    const total = dataRows.length;
-    const available = dataRows.filter(r => {
-      const s = (r[cStatus]||'').toLowerCase();
-      return s.includes('avail') || s === 'active' || s === 'ok' || s === '';
-    }).length;
-    const down = total - available;
-    document.getElementById('fleet-total').textContent = total;
-    document.getElementById('fleet-down').textContent = down;
-    const pct = total > 0 ? Math.round((available/total)*100) : 0;
-    document.getElementById('fleet-bar-fill').style.width = pct + '%';
-    document.getElementById('fleet-bar-fill').style.background = pct > 90 ? 'var(--teal)' : pct > 75 ? 'var(--amber)' : 'var(--red)';
-    document.getElementById('fleet-list').textContent = pct + '% available · ' + available + ' of ' + total + ' bikes operational';
-  } catch(e) {
-    document.getElementById('fleet-list').textContent = 'Connect Papaya Dash to see fleet data';
-  }
+    const r=await fetch(pubUrl('STAFFING'));
+    const text=await r.text();
+    if(text.trim().startsWith('<')) throw new Error('not published');
+    const rows=parseCSV(text);
+    const hi=rows.findIndex(r=>r.some(c=>/day|date/i.test(c)));
+    if(hi===-1) throw new Error('no header');
+    const headers=rows[hi];
+    const ci=n=>headers.findIndex(h=>h.toLowerCase().includes(n.toLowerCase()));
+    const cDay=ci('day'),cDate=ci('date');
+    const cBFst=ci('breakfast (staff)'),cBRst=ci('brunch (staff)'),cDIst=ci('dinner (staff)'),cBDst=ci('bedtime (staff)');
+    const cBFrt=ci('breakfast (routes)'),cBRrt=ci('brunch (routes)'),cDIrt=ci('dinner (routes)'),cBDrt=ci('bedtime (routes)');
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dataRows=rows.slice(hi+1).filter(r=>r[cDay]&&days.includes(r[cDay]));
+    if(!dataRows.length) throw new Error('no data');
+    renderShiftGrid(dataRows.slice(0,7).map(r=>({
+      day:r[cDay],date:r[cDate],
+      routes:{BF:parseInt(r[cBFrt])||0,BR:parseInt(r[cBRrt])||0,DI:parseInt(r[cDIrt])||0,BD:parseInt(r[cBDrt])||0},
+      staff:{BF:parseInt(r[cBFst])||0,BR:parseInt(r[cBRst])||0,DI:parseInt(r[cDIst])||0,BD:parseInt(r[cBDst])||0}
+    })));
+    document.getElementById('sheet-status').style.color='var(--teal)';
+    document.getElementById('sheet-status').textContent='✓ Live · '+new Date().toLocaleTimeString();
+  } catch(e){ buildFallbackGrid(); }
+}
+
+async function loadFleet(){
+  try {
+    const r=await fetch(pubUrl('FLEET'));
+    const text=await r.text();
+    if(text.trim().startsWith('<')) return;
+    const rows=parseCSV(text);
+    const hi=rows.findIndex(r=>r.some(c=>/vehicle|bike|unit|status/i.test(c)));
+    if(hi===-1) return;
+    const headers=rows[hi];
+    const ci=n=>headers.findIndex(h=>h.toLowerCase().includes(n.toLowerCase()));
+    const cStatus=ci('status');
+    const dataRows=rows.slice(hi+1).filter(r=>r[0]&&r[0].trim()!=='');
+    const total=dataRows.length;
+    const avail=dataRows.filter(r=>{const s=(r[cStatus]||'').toLowerCase();return s.includes('avail')||s==='active'||s==='ok'||s===''}).length;
+    const down=total-avail;
+    const pct=total>0?Math.round((avail/total)*100):0;
+    document.getElementById('fleet-total').textContent=total;
+    document.getElementById('fleet-down').textContent=down;
+    document.getElementById('fleet-bar-fill').style.width=pct+'%';
+    document.getElementById('fleet-bar-fill').style.background=pct>90?'var(--teal)':pct>75?'var(--amber)':'var(--red)';
+    document.getElementById('fleet-list').textContent=pct+'% available · '+avail+' of '+total+' operational';
+  } catch(e){}
 }
 
 // Boot
-buildShiftGrid();
+buildFallbackGrid();
 loadStaffing();
-loadRoutes();
 loadFleet();
 </script>
 </body>
 </html>
-      <div id="wx-nyc" class="weather-card">
-        <div class="wx-city">New York City</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-nyc-t">—°</div></div>
-        <div class="wx-desc" id="wx-nyc-d">Loading…</div>
-        <div class="wx-detail" id="wx-nyc-x"></div>
-      </div>
-      <div id="wx-chi" class="weather-card">
-        <div class="wx-city">Chicago</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-chi-t">—°</div></div>
-        <div class="wx-desc" id="wx-chi-d">Loading…</div>
-        <div class="wx-detail" id="wx-chi-x"></div>
-      </div>
-      <div id="wx-mil" class="weather-card">
-        <div class="wx-city">Milwaukee</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-mil-t">—°</div></div>
-        <div class="wx-desc" id="wx-mil-d">Loading…</div>
-        <div class="wx-detail" id="wx-mil-x"></div>
-      </div>
-      <div class="claims-card">
-        <div class="panel-title" style="margin-bottom:8px"><span>Claims</span></div>
-        <div class="claim-item">
-          <div class="claim-id">XC-ORCA-26-00515</div>
-          <div class="claim-name">Derek Barnes</div>
-          <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
-        </div>
-        <div class="claim-item">
-          <div class="claim-id">XC-ORCA-25-05451</div>
-          <div class="claim-name">Jennifer Yancey</div>
-          <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
-        </div>
-      </div>
+
 
