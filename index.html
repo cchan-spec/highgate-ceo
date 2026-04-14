@@ -195,35 +195,26 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
         <span>Weather</span>
         <span class="chip chip-teal">Live</span>
       </div>
-      <div id="wx-nyc" class="weather-card">
-        <div class="wx-city">New York City</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-nyc-t">—°</div></div>
-        <div class="wx-desc" id="wx-nyc-d">Loading…</div>
-        <div class="wx-detail" id="wx-nyc-x"></div>
-      </div>
-      <div id="wx-chi" class="weather-card">
-        <div class="wx-city">Chicago</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-chi-t">—°</div></div>
-        <div class="wx-desc" id="wx-chi-d">Loading…</div>
-        <div class="wx-detail" id="wx-chi-x"></div>
-      </div>
-      <div id="wx-mil" class="weather-card">
-        <div class="wx-city">Milwaukee</div>
-        <div class="wx-row"><div class="wx-temp" id="wx-mil-t">—°</div></div>
-        <div class="wx-desc" id="wx-mil-d">Loading…</div>
-        <div class="wx-detail" id="wx-mil-x"></div>
-      </div>
-      <div class="claims-card">
-        <div class="panel-title" style="margin-bottom:8px"><span>Claims</span></div>
-        <div class="claim-item">
-          <div class="claim-id">XC-ORCA-26-00515</div>
-          <div class="claim-name">Derek Barnes</div>
-          <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
+      <div class="claims-card" id="fleet-card">
+        <div class="panel-title" style="margin-bottom:8px">
+          <span>Fleet</span>
+          <span class="chip chip-teal">Papaya</span>
         </div>
-        <div class="claim-item">
-          <div class="claim-id">XC-ORCA-25-05451</div>
-          <div class="claim-name">Jennifer Yancey</div>
-          <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
+        <div id="fleet-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div>
+              <div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal)" id="fleet-total">—</div>
+              <div style="font-size:9px;color:var(--w3);letter-spacing:.4px">TOTAL BIKES</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--red)" id="fleet-down">—</div>
+              <div style="font-size:9px;color:var(--w3);letter-spacing:.4px">DOWN / SERVICE</div>
+            </div>
+          </div>
+          <div id="fleet-bar" style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:6px">
+            <div id="fleet-bar-fill" style="height:100%;background:var(--teal);width:0%;transition:width .5s;border-radius:2px"></div>
+          </div>
+          <div id="fleet-list" style="font-size:10px;color:var(--w3);font-family:var(--mono)">Loading…</div>
         </div>
       </div>
     </div>
@@ -547,10 +538,74 @@ function buildShiftGrid() {
   }
 }
 
+// ── Fleet ─────────────────────────────────────
+async function loadFleet() {
+  try {
+    const r = await fetch(pubUrl('FLEET'));
+    const text = await r.text();
+    if (text.trim().startsWith('<')) return;
+    const rows = parseCSV(text);
+    const hi = rows.findIndex(r => r.some(c => /vehicle|bike|unit|status/i.test(c)));
+    if (hi === -1) return;
+    const headers = rows[hi];
+    const ci = (n) => headers.findIndex(h => h.toLowerCase().includes(n.toLowerCase()));
+    const cStatus = ci('status');
+    const cUnit = ci('unit') !== -1 ? ci('unit') : ci('vehicle') !== -1 ? ci('vehicle') : 0;
+    const dataRows = rows.slice(hi+1).filter(r => r[0] && r[0].trim() !== '');
+    const total = dataRows.length;
+    const available = dataRows.filter(r => {
+      const s = (r[cStatus]||'').toLowerCase();
+      return s.includes('avail') || s === 'active' || s === 'ok' || s === '';
+    }).length;
+    const down = total - available;
+    document.getElementById('fleet-total').textContent = total;
+    document.getElementById('fleet-down').textContent = down;
+    const pct = total > 0 ? Math.round((available/total)*100) : 0;
+    document.getElementById('fleet-bar-fill').style.width = pct + '%';
+    document.getElementById('fleet-bar-fill').style.background = pct > 90 ? 'var(--teal)' : pct > 75 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('fleet-list').textContent = pct + '% available · ' + available + ' of ' + total + ' bikes operational';
+  } catch(e) {
+    document.getElementById('fleet-list').textContent = 'Connect Papaya Dash to see fleet data';
+  }
+}
+
 // Boot
 buildShiftGrid();
 loadStaffing();
 loadRoutes();
+loadFleet();
 </script>
 </body>
 </html>
+      <div id="wx-nyc" class="weather-card">
+        <div class="wx-city">New York City</div>
+        <div class="wx-row"><div class="wx-temp" id="wx-nyc-t">—°</div></div>
+        <div class="wx-desc" id="wx-nyc-d">Loading…</div>
+        <div class="wx-detail" id="wx-nyc-x"></div>
+      </div>
+      <div id="wx-chi" class="weather-card">
+        <div class="wx-city">Chicago</div>
+        <div class="wx-row"><div class="wx-temp" id="wx-chi-t">—°</div></div>
+        <div class="wx-desc" id="wx-chi-d">Loading…</div>
+        <div class="wx-detail" id="wx-chi-x"></div>
+      </div>
+      <div id="wx-mil" class="weather-card">
+        <div class="wx-city">Milwaukee</div>
+        <div class="wx-row"><div class="wx-temp" id="wx-mil-t">—°</div></div>
+        <div class="wx-desc" id="wx-mil-d">Loading…</div>
+        <div class="wx-detail" id="wx-mil-x"></div>
+      </div>
+      <div class="claims-card">
+        <div class="panel-title" style="margin-bottom:8px"><span>Claims</span></div>
+        <div class="claim-item">
+          <div class="claim-id">XC-ORCA-26-00515</div>
+          <div class="claim-name">Derek Barnes</div>
+          <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
+        </div>
+        <div class="claim-item">
+          <div class="claim-id">XC-ORCA-25-05451</div>
+          <div class="claim-name">Jennifer Yancey</div>
+          <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
+        </div>
+      </div>
+
