@@ -481,21 +481,24 @@ async function loadFleet(){
     const text=await r.text();
     if(text.trim().startsWith('<')) return;
     const rows=parseCSV(text);
-    const hi=rows.findIndex(r=>r.some(c=>/vehicle|bike|unit|status/i.test(c)));
+    if(rows.length < 2) return;
+    // Find header row
+    const hi=rows.findIndex(r=>r.some(c=>/total|available|hub/i.test(c)));
     if(hi===-1) return;
     const headers=rows[hi];
     const ci=n=>headers.findIndex(h=>h.toLowerCase().includes(n.toLowerCase()));
-    const cStatus=ci('status');
-    const dataRows=rows.slice(hi+1).filter(r=>r[0]&&r[0].trim()!=='');
-    const total=dataRows.length;
-    const avail=dataRows.filter(r=>{const s=(r[cStatus]||'').toLowerCase();return s.includes('avail')||s==='active'||s==='ok'||s===''}).length;
-    const down=total-avail;
-    const pct=total>0?Math.round((avail/total)*100):0;
+    const dataRow=rows[hi+1];
+    if(!dataRow) return;
+    const total=parseInt(dataRow[ci('total')])||0;
+    const avail=parseInt(dataRow[ci('available')])||0;
+    const down=parseInt(dataRow[ci('unavailable')])||0;
+    const pct=parseInt(dataRow[ci('availability')])||0;
+    const actionReq=parseInt(dataRow[ci('action required')])||0;
     document.getElementById('fleet-total').textContent=total;
     document.getElementById('fleet-down').textContent=down;
     document.getElementById('fleet-bar-fill').style.width=pct+'%';
     document.getElementById('fleet-bar-fill').style.background=pct>90?'var(--teal)':pct>75?'var(--amber)':'var(--red)';
-    document.getElementById('fleet-list').textContent=pct+'% available · '+avail+' of '+total+' operational';
+    document.getElementById('fleet-list').textContent=pct+'% available · '+avail+' operational · '+actionReq+' need attention';
   } catch(e){}
 }
 
