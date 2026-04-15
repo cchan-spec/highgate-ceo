@@ -73,12 +73,17 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 #flag-list{}
 
 /* ── WEATHER ── */
-.wx-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .wx-card{border-radius:var(--rs);background:var(--raised);border:1px solid var(--bdr);padding:10px 12px}
-.wx-city{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:4px}
-.wx-temp{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--w1);line-height:1}
-.wx-desc{font-size:10px;color:var(--w2);margin-top:2px}
-.wx-detail{font-size:9px;color:var(--w3);font-family:var(--mono);margin-top:1px}
+.wx-city{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--w3);text-transform:uppercase;margin-bottom:8px}
+.wx-days{display:flex;gap:6px;overflow-x:auto}
+.wx-day{flex-shrink:0;text-align:center;min-width:52px}
+.wx-day-name{font-size:9px;color:var(--w3);font-family:var(--mono);letter-spacing:.4px;margin-bottom:3px}
+.wx-day.today .wx-day-name{color:var(--teal);font-weight:600}
+.wx-hi{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--w1);line-height:1}
+.wx-lo{font-family:var(--mono);font-size:11px;color:var(--w3);margin-top:1px}
+.wx-icon{font-size:16px;margin-bottom:2px}
+.wx-desc-sm{font-size:8px;color:var(--w3);margin-top:2px;line-height:1.3}
+.wx-loading{font-size:10px;color:var(--w3);font-family:var(--mono)}
 
 /* ── FLEET + CLAIMS row ── */
 .info-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -167,25 +172,10 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 <!-- WEATHER -->
 <div class="section">
   <div class="section-title"><span>Weather</span><span class="chip chip-teal">Live</span></div>
-  <div class="wx-row">
-    <div class="wx-card">
-      <div class="wx-city">New York</div>
-      <div class="wx-temp" id="wx-nyc-t">—°</div>
-      <div class="wx-desc" id="wx-nyc-d">…</div>
-      <div class="wx-detail" id="wx-nyc-x"></div>
-    </div>
-    <div class="wx-card">
-      <div class="wx-city">Chicago</div>
-      <div class="wx-temp" id="wx-chi-t">—°</div>
-      <div class="wx-desc" id="wx-chi-d">…</div>
-      <div class="wx-detail" id="wx-chi-x"></div>
-    </div>
-    <div class="wx-card">
-      <div class="wx-city">Milwaukee</div>
-      <div class="wx-temp" id="wx-mil-t">—°</div>
-      <div class="wx-desc" id="wx-mil-d">…</div>
-      <div class="wx-detail" id="wx-mil-x"></div>
-    </div>
+  <div id="wx-container" style="display:flex;flex-direction:column;gap:10px">
+    <div class="wx-card" id="wx-nyc"><div class="wx-city">New York City</div><div class="wx-loading">Loading…</div></div>
+    <div class="wx-card" id="wx-chi"><div class="wx-city">Chicago</div><div class="wx-loading">Loading…</div></div>
+    <div class="wx-card" id="wx-mil"><div class="wx-city">Milwaukee</div><div class="wx-loading">Loading…</div></div>
   </div>
 </div>
 
@@ -353,20 +343,43 @@ async function loadCalendar() {
 loadCalendar();
 
 // ── Weather ───────────────────────────────────
-const WX = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',51:'Light Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',80:'Showers',95:'Thunderstorm'};
-async function loadWx(lat,lon,tid,did,xid) {
+const WX_DESC = {0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',48:'Icy Fog',51:'Lt Drizzle',53:'Drizzle',55:'Hvy Drizzle',61:'Lt Rain',63:'Rain',65:'Hvy Rain',71:'Lt Snow',73:'Snow',75:'Hvy Snow',80:'Showers',81:'Hvy Showers',95:'Thunderstorm',96:'T-Storm+Hail'};
+const WX_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',95:'⛈️',96:'⛈️'};
+
+async function loadWx(lat, lon, cardId) {
   try {
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=auto`);
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=5`;
+    const r = await fetch(url);
     const d = await r.json();
-    const cw = d.current_weather;
-    document.getElementById(tid).textContent = Math.round(cw.temperature)+'°F';
-    document.getElementById(did).textContent = WX[cw.weathercode]||'';
-    document.getElementById(xid).textContent = 'Wind '+Math.round(cw.windspeed)+' mph';
-  } catch(e) { document.getElementById(did).textContent='Unavailable'; }
+    const daily = d.daily;
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date();
+    let daysHtml = daily.time.map((dateStr, i) => {
+      const date = new Date(dateStr + 'T12:00:00');
+      const name = i === 0 ? 'Today' : dayNames[date.getDay()];
+      const isToday = i === 0;
+      const code = daily.weathercode[i];
+      const hi = Math.round(daily.temperature_2m_max[i]);
+      const lo = Math.round(daily.temperature_2m_min[i]);
+      const rain = daily.precipitation_probability_max[i];
+      return `<div class="wx-day${isToday?' today':''}">
+        <div class="wx-day-name">${name}</div>
+        <div class="wx-icon">${WX_ICON[code]||'🌡️'}</div>
+        <div class="wx-hi">${hi}°</div>
+        <div class="wx-lo">${lo}°</div>
+        ${rain > 20 ? `<div class="wx-desc-sm" style="color:var(--blue)">💧${rain}%</div>` : '<div class="wx-desc-sm"></div>'}
+      </div>`;
+    }).join('');
+    const card = document.getElementById(cardId);
+    const city = card.querySelector('.wx-city').outerHTML;
+    card.innerHTML = city + `<div class="wx-days">${daysHtml}</div>`;
+  } catch(e) {
+    document.getElementById(cardId).querySelector('.wx-loading').textContent = 'Unavailable';
+  }
 }
-loadWx(40.7128,-74.0060,'wx-nyc-t','wx-nyc-d','wx-nyc-x');
-loadWx(41.8781,-87.6298,'wx-chi-t','wx-chi-d','wx-chi-x');
-loadWx(43.0389,-87.9065,'wx-mil-t','wx-mil-d','wx-mil-x');
+loadWx(40.7128,-74.0060,'wx-nyc');
+loadWx(41.8781,-87.6298,'wx-chi');
+loadWx(43.0389,-87.9065,'wx-mil');
 
 // ── Sheet data ────────────────────────────────
 const PUBLISH_ID = '2PACX-1vS-8gcbLZ2mjG2JhVeOiPo5KE6NzkA7a9dDTWNleqT-HOjP_OOo4u29L34BwUTCQRh9h_6tIEcNs2pi';
