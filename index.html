@@ -156,7 +156,7 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 
 <!-- STAFFING -->
 <div class="section">
-  <div class="section-title"><span>Staffing vs Routes</span><span class="chip chip-teal">DSP Workplace</span><span class="chip chip-amber">WK16</span></div>
+  <div class="section-title"><span>Staffing vs Routes</span><span class="chip chip-teal">DSP Workplace</span><span class="chip chip-amber">WK16–17</span></div>
   <div class="shift-hdr">
     <div class="shift-col-lbl">Day</div>
     <div class="shift-col-lbl">BF</div>
@@ -348,12 +348,11 @@ const WX_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫
 
 async function loadWx(lat, lon, cardId) {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=5`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=10`;
     const r = await fetch(url);
     const d = await r.json();
     const daily = d.daily;
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const today = new Date();
     let daysHtml = daily.time.map((dateStr, i) => {
       const date = new Date(dateStr + 'T12:00:00');
       const name = i === 0 ? 'Today' : dayNames[date.getDay()];
@@ -432,11 +431,19 @@ function renderShiftGrid(shiftData){
 
 function buildFallbackGrid(){
   renderShiftGrid([
-    {day:'Tue',date:'04/14',routes:{BF:23,BR:29,DI:24,BD:25},staff:{BF:30,BR:44,DI:34,BD:35}},
+    // WK16
     {day:'Wed',date:'04/15',routes:{BF:21,BR:28,DI:23,BD:25},staff:{BF:27,BR:41,DI:30,BD:33}},
     {day:'Thu',date:'04/16',routes:{BF:24,BR:30,DI:26,BD:26},staff:{BF:26,BR:36,DI:33,BD:31}},
     {day:'Fri',date:'04/17',routes:{BF:24,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:36,BD:29}},
     {day:'Sat',date:'04/18',routes:{BF:26,BR:31,DI:26,BD:26},staff:{BF:28,BR:34,DI:31,BD:32}},
+    // WK17
+    {day:'Sun',date:'04/19',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:0,BR:0,DI:0,BD:0}},
+    {day:'Mon',date:'04/20',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:19,BR:32,DI:26,BD:29}},
+    {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:29,BR:36,DI:31,BD:34}},
+    {day:'Wed',date:'04/22',routes:{BF:21,BR:27,DI:26,BD:25},staff:{BF:24,BR:36,DI:33,BD:30}},
+    {day:'Thu',date:'04/23',routes:{BF:24,BR:29,DI:26,BD:26},staff:{BF:24,BR:38,DI:36,BD:27}},
+    {day:'Fri',date:'04/24',routes:{BF:23,BR:31,DI:26,BD:26},staff:{BF:24,BR:38,DI:36,BD:27}},
+    {day:'Sat',date:'04/25',routes:{BF:25,BR:31,DI:26,BD:26},staff:{BF:27,BR:38,DI:31,BD:31}},
   ]);
   const wrap=document.getElementById('spark16');
   if(wrap&&!wrap.children.length){
@@ -465,7 +472,7 @@ async function loadStaffing(){
     const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const dataRows=rows.slice(hi+1).filter(r=>r[cDay]&&days.includes(r[cDay]));
     if(!dataRows.length) throw new Error('no data');
-    renderShiftGrid(dataRows.slice(0,7).map(r=>({
+    renderShiftGrid(dataRows.slice(0,14).map(r=>({
       day:r[cDay],date:r[cDate],
       routes:{BF:parseInt(r[cBFrt])||0,BR:parseInt(r[cBRrt])||0,DI:parseInt(r[cDIrt])||0,BD:parseInt(r[cBDrt])||0},
       staff:{BF:parseInt(r[cBFst])||0,BR:parseInt(r[cBRst])||0,DI:parseInt(r[cDIst])||0,BD:parseInt(r[cBDst])||0}
