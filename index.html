@@ -174,6 +174,17 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
     <div class="shift-col-lbl">Bedtime</div>
   </div>
   <div id="shift-grid"></div>
+  <div class="info-card" style="margin:12px 0 8px 0">
+    <div class="info-card-title">Fleet <span class="chip chip-teal" style="margin-left:4px">Papaya</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <div><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal)" id="fleet-total">—</div><div style="font-size:9px;color:var(--w3)">TOTAL BIKES</div></div>
+      <div style="text-align:right"><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--red)" id="fleet-down">—</div><div style="font-size:9px;color:var(--w3)">DOWN</div></div>
+    </div>
+    <div style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:6px">
+      <div id="fleet-bar-fill" style="height:100%;background:var(--teal);width:0%;transition:width .5s;border-radius:2px"></div>
+    </div>
+    <div id="fleet-list" style="font-size:10px;color:var(--w3);font-family:var(--mono)">Loading…</div>
+  </div>
   <div class="flags-title">⚠ Shift Flags</div>
   <div id="flag-list"></div>
 </div>
@@ -188,32 +199,19 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
   </div>
 </div>
 
-<!-- FLEET + CLAIMS -->
+<!-- CLAIMS -->
 <div class="section">
-  <div class="info-row">
-    <div class="info-card">
-      <div class="info-card-title">Fleet <span class="chip chip-teal" style="margin-left:4px">Papaya</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <div><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--teal)" id="fleet-total">—</div><div style="font-size:9px;color:var(--w3)">TOTAL BIKES</div></div>
-        <div style="text-align:right"><div style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--red)" id="fleet-down">—</div><div style="font-size:9px;color:var(--w3)">DOWN</div></div>
-      </div>
-      <div style="height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:6px">
-        <div id="fleet-bar-fill" style="height:100%;background:var(--teal);width:0%;transition:width .5s;border-radius:2px"></div>
-      </div>
-      <div id="fleet-list" style="font-size:10px;color:var(--w3);font-family:var(--mono)">Connect Papaya Dash</div>
+  <div class="info-card">
+    <div class="info-card-title">Claims</div>
+    <div class="claim-item">
+      <div class="claim-id">XC-ORCA-26-00515</div>
+      <div class="claim-name">Derek Barnes</div>
+      <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
     </div>
-    <div class="info-card">
-      <div class="info-card-title">Claims</div>
-      <div class="claim-item">
-        <div class="claim-id">XC-ORCA-26-00515</div>
-        <div class="claim-name">Derek Barnes</div>
-        <div class="claim-status claim-open">⚠ OPEN · 34+ days</div>
-      </div>
-      <div class="claim-item">
-        <div class="claim-id">XC-ORCA-25-05451</div>
-        <div class="claim-name">Jennifer Yancey</div>
-        <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
-      </div>
+    <div class="claim-item">
+      <div class="claim-id">XC-ORCA-25-05451</div>
+      <div class="claim-name">Jennifer Yancey</div>
+      <div class="claim-status claim-closed">✓ CLOSED · Paid</div>
     </div>
   </div>
 </div>
@@ -299,8 +297,8 @@ function updateClock() {
 updateClock(); setInterval(updateClock,1000);
 
 // Build timestamp — changes each time HTML is regenerated
-const BUILD_TS = '2026-04-19 20:33:40';
-const BUILD_MS = new Date('2026-04-19 20:33:40-04:00').getTime();
+const BUILD_TS = '2026-04-19 20:42:31';
+const BUILD_MS = new Date('2026-04-19 20:42:31-04:00').getTime();
 
 // Hard refresh — bypasses mobile browser cache by navigating to a cache-busted URL
 function hardRefresh() {
@@ -455,7 +453,7 @@ function renderShiftGrid(shiftData){
       const s=d.staff[shift],r=d.routes[shift];
       if(!r){html+=`<div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:4px 3px;text-align:center"><div style="font-size:11px;color:var(--w4);font-family:var(--mono)">—</div></div>`;return;}
       const ratio=s/r,thresh=THRESH[shift],ok=ratio>=thresh,pct=Math.round(ratio*100);
-      if(!ok)flags.push({day:d.day,shift:SHIFT_LABELS[shift],s,r,pct,need:Math.round(thresh*100)});
+      if(!ok)flags.push({day:d.day,date:d.date,shift:SHIFT_LABELS[shift],s,r,pct,need:Math.round(thresh*100)});
       html+=`<div style="background:${ok?'rgba(255,255,255,.03)':'rgba(248,113,113,.10)'};border:${ok?'1px solid rgba(255,255,255,.06)':'1px solid rgba(248,113,113,.35)'};border-radius:4px;padding:4px 3px;text-align:center">
         <div style="font-size:12px;font-weight:500;font-family:var(--mono);color:${ok?'var(--teal)':'var(--red)'};line-height:1">${pct}%</div>
         <div style="font-size:9px;font-family:var(--mono);color:var(--w3);margin-top:2px">${s}<span style="color:var(--w4)">/${r}</span></div>
@@ -467,7 +465,7 @@ function renderShiftGrid(shiftData){
   grid.innerHTML=html;
   flagList.innerHTML=flags.length===0
     ?'<div style="font-size:10px;color:var(--teal);font-family:var(--mono);padding:3px 0">✓ All shifts meeting threshold</div>'
-    :flags.map(f=>`<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5"><span style="color:var(--amber);font-weight:500">${f.day} ${f.shift}</span><span style="color:var(--w3)"> · ${f.s}/${f.r} = </span><span style="color:var(--red);font-weight:500">${f.pct}%</span><span style="color:var(--w3)"> (need ${f.need}%)</span></div>`).join('');
+    :flags.map(f=>`<div style="font-size:10px;font-family:var(--mono);color:var(--w2);padding:4px 8px;margin-bottom:3px;border-left:2px solid var(--red-d);background:var(--red-m);border-radius:0 4px 4px 0;line-height:1.5"><span style="color:var(--amber);font-weight:500">${f.day} ${f.date||''} ${f.shift}</span><span style="color:var(--w3)"> · ${f.s}/${f.r} = </span><span style="color:var(--red);font-weight:500">${f.pct}%</span><span style="color:var(--w3)"> (need ${f.need}%)</span></div>`).join('');
   document.getElementById('hdr-flags').textContent=flags.length;
   document.getElementById('hdr-flags').style.color=flags.length>0?'var(--red)':'var(--teal)';
   if(todayStaff) document.getElementById('hdr-staff').textContent=todayStaff;
@@ -476,12 +474,7 @@ function renderShiftGrid(shiftData){
 
 function buildFallbackGrid(){
   renderShiftGrid([
-    // WK16 remaining
-    {day:'Wed',date:'04/15',routes:{BF:21,BR:28,DI:23,BD:25},staff:{BF:27,BR:41,DI:30,BD:33}},
-    {day:'Thu',date:'04/16',routes:{BF:24,BR:30,DI:26,BD:26},staff:{BF:26,BR:36,DI:33,BD:31}},
-    {day:'Fri',date:'04/17',routes:{BF:24,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:36,BD:29}},
-    {day:'Sat',date:'04/18',routes:{BF:26,BR:31,DI:26,BD:26},staff:{BF:28,BR:34,DI:31,BD:32}},
-    // WK17 — API-sourced Apr 15 10:49pm
+    // 7 days forward from today (Apr 19)
     {day:'Sun',date:'04/19',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:21,BR:33,DI:29,BD:31}},
     {day:'Mon',date:'04/20',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:27,BR:34,DI:30,BD:34}},
     {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:25,BR:43,DI:34,BD:34}},
@@ -529,7 +522,7 @@ async function loadStaffing(){
 
 function loadFleet(){
   // Fleet data — updated each session via "refresh my dashboard data"
-  const total=35, avail=24, down=11, pct=69, actionReq=6;
+  const total=36, avail=27, down=9, pct=75, actionReq=0;
   document.getElementById('fleet-total').textContent=total;
   document.getElementById('fleet-down').textContent=down;
   document.getElementById('fleet-bar-fill').style.width=pct+'%';
