@@ -126,6 +126,13 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+
+#refresh-btn{background:var(--teal-m);border:1px solid var(--teal-d);color:var(--teal);
+  padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;
+  margin-top:4px;display:block;transition:all .15s}
+#refresh-btn:active{background:var(--teal-d);color:var(--w1)}
+#last-sync{font-size:9px;color:var(--w3);font-family:var(--mono);margin-top:2px;text-align:right}
+.stale{color:var(--amber) !important}
 </style>
 </head>
 <body>
@@ -145,6 +152,8 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
   <div class="hdr-right">
     <div class="hdr-time" id="hdr-clock">--:--</div>
     <div class="hdr-date" id="hdr-date"></div>
+    <div id="last-sync"></div>
+    <button id="refresh-btn" onclick="hardRefresh()" title="Force refresh — bypasses cache">↻ Refresh</button>
   </div>
 </div>
 
@@ -289,6 +298,42 @@ function updateClock() {
 }
 updateClock(); setInterval(updateClock,1000);
 
+// Build timestamp — changes each time HTML is regenerated
+const BUILD_TS = '2026-04-20 00:22:43';
+const BUILD_MS = new Date('2026-04-20 00:22:43').getTime();
+
+// Hard refresh — bypasses mobile browser cache by navigating to a cache-busted URL
+function hardRefresh() {
+  // Append current timestamp to URL to force full reload from network
+  const url = new URL(window.location.href);
+  url.searchParams.set('v', Date.now());
+  window.location.replace(url.toString());
+}
+
+// Show last-synced timestamp and flag if HTML is older than 24 hours
+function updateSyncIndicator() {
+  const el = document.getElementById('last-sync');
+  if (!el) return;
+  const ageMs = Date.now() - BUILD_MS;
+  const ageHours = ageMs / (1000 * 60 * 60);
+  const buildDate = new Date(BUILD_MS);
+  const buildStr = buildDate.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+  el.textContent = 'DATA: ' + buildStr;
+  if (ageHours > 20) {
+    el.classList.add('stale');
+    el.textContent = '⚠ STALE · ' + buildStr;
+  }
+}
+updateSyncIndicator();
+
+// On mobile: detect pull-to-refresh and force cache-bust
+if ('serviceWorker' in navigator) {
+  // Kill any old service workers that might be caching stale content
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  });
+}
+
 // ── Calendar ──────────────────────────────────
 const CAL_API_URL = 'https://script.google.com/macros/s/AKfycbx1Gmls0yjnBdnJb7VKTiPq_lrzkJTRpK3aB4FLBuGt17CY8lRq7qCSAewAUSB2nSKwOg/exec';
 
@@ -313,7 +358,7 @@ function buildCalendarShell() {
 async function loadCalendar() {
   buildCalendarShell();
   try {
-    const r = await fetch(CAL_API_URL, {redirect:'follow'});
+    const r = await fetch(CAL_API_URL + '?t=' + Date.now(), {redirect:'follow', cache:'no-store'});
     const events = await r.json();
     if (!Array.isArray(events)) throw new Error('bad response');
     const today = new Date(); today.setHours(0,0,0,0);
@@ -349,7 +394,7 @@ const WX_ICON = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫
 async function loadWx(lat, lon, cardId) {
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=10`;
-    const r = await fetch(url);
+    const r = await fetch(url, {cache:'no-store'});
     const d = await r.json();
     const daily = d.daily;
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -431,19 +476,19 @@ function renderShiftGrid(shiftData){
 
 function buildFallbackGrid(){
   renderShiftGrid([
-    // WK16
+    // WK16 remaining
     {day:'Wed',date:'04/15',routes:{BF:21,BR:28,DI:23,BD:25},staff:{BF:27,BR:41,DI:30,BD:33}},
     {day:'Thu',date:'04/16',routes:{BF:24,BR:30,DI:26,BD:26},staff:{BF:26,BR:36,DI:33,BD:31}},
     {day:'Fri',date:'04/17',routes:{BF:24,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:36,BD:29}},
     {day:'Sat',date:'04/18',routes:{BF:26,BR:31,DI:26,BD:26},staff:{BF:28,BR:34,DI:31,BD:32}},
-    // WK17
-    {day:'Sun',date:'04/19',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:0,BR:0,DI:0,BD:0}},
-    {day:'Mon',date:'04/20',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:19,BR:32,DI:26,BD:29}},
-    {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:29,BR:36,DI:31,BD:34}},
-    {day:'Wed',date:'04/22',routes:{BF:21,BR:27,DI:26,BD:25},staff:{BF:24,BR:36,DI:33,BD:30}},
-    {day:'Thu',date:'04/23',routes:{BF:24,BR:29,DI:26,BD:26},staff:{BF:24,BR:38,DI:36,BD:27}},
-    {day:'Fri',date:'04/24',routes:{BF:23,BR:31,DI:26,BD:26},staff:{BF:24,BR:38,DI:36,BD:27}},
-    {day:'Sat',date:'04/25',routes:{BF:25,BR:31,DI:26,BD:26},staff:{BF:27,BR:38,DI:31,BD:31}},
+    // WK17 — API-sourced Apr 15 10:49pm
+    {day:'Sun',date:'04/19',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:21,BR:33,DI:29,BD:31}},
+    {day:'Mon',date:'04/20',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:27,BR:34,DI:30,BD:34}},
+    {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:25,BR:43,DI:34,BD:34}},
+    {day:'Wed',date:'04/22',routes:{BF:21,BR:27,DI:26,BD:25},staff:{BF:25,BR:41,DI:28,BD:33}},
+    {day:'Thu',date:'04/23',routes:{BF:24,BR:29,DI:26,BD:26},staff:{BF:24,BR:36,DI:30,BD:30}},
+    {day:'Fri',date:'04/24',routes:{BF:23,BR:31,DI:26,BD:26},staff:{BF:26,BR:36,DI:31,BD:28}},
+    {day:'Sat',date:'04/25',routes:{BF:25,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:29,BD:30}},
   ]);
   const wrap=document.getElementById('spark16');
   if(wrap&&!wrap.children.length){
@@ -458,7 +503,7 @@ function buildFallbackGrid(){
 
 async function loadStaffing(){
   try {
-    const r=await fetch(pubUrl('STAFFING'));
+    const r=await fetch(pubUrl('STAFFING') + '&t=' + Date.now(), {cache:'no-store'});
     const text=await r.text();
     if(text.trim().startsWith('<')) throw new Error('not published');
     const rows=parseCSV(text);
