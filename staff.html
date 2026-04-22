@@ -282,8 +282,8 @@ function updateClock() {
 updateClock(); setInterval(updateClock,1000);
 
 // Build timestamp — changes each time HTML is regenerated
-const BUILD_TS = '2026-04-19 20:45:00';
-const BUILD_MS = new Date('2026-04-19 20:45:00-04:00').getTime();
+const BUILD_TS = '2026-04-22 06:20:00';
+const BUILD_MS = new Date('2026-04-22 06:20:00-04:00').getTime();
 
 // Hard refresh — bypasses mobile browser cache by navigating to a cache-busted URL
 function hardRefresh() {
@@ -459,14 +459,15 @@ function renderShiftGrid(shiftData){
 
 function buildFallbackGrid(){
   renderShiftGrid([
-    // 7 days forward from today (Apr 19)
-    {day:'Sun',date:'04/19',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:21,BR:33,DI:29,BD:31}},
-    {day:'Mon',date:'04/20',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:27,BR:34,DI:30,BD:34}},
-    {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:25,BR:43,DI:34,BD:34}},
+    // API-sourced Apr 21, 6:10am
+    {day:'Tue',date:'04/21',routes:{BF:23,BR:29,DI:26,BD:26},staff:{BF:26,BR:43,DI:34,BD:32}},
     {day:'Wed',date:'04/22',routes:{BF:21,BR:27,DI:26,BD:25},staff:{BF:25,BR:41,DI:28,BD:33}},
-    {day:'Thu',date:'04/23',routes:{BF:24,BR:29,DI:26,BD:26},staff:{BF:24,BR:36,DI:30,BD:30}},
-    {day:'Fri',date:'04/24',routes:{BF:23,BR:31,DI:26,BD:26},staff:{BF:26,BR:36,DI:31,BD:28}},
-    {day:'Sat',date:'04/25',routes:{BF:25,BR:31,DI:26,BD:26},staff:{BF:25,BR:38,DI:29,BD:30}},
+    {day:'Thu',date:'04/23',routes:{BF:24,BR:29,DI:26,BD:26},staff:{BF:26,BR:36,DI:30,BD:29}},
+    {day:'Fri',date:'04/24',routes:{BF:23,BR:31,DI:26,BD:26},staff:{BF:27,BR:35,DI:31,BD:27}},
+    {day:'Sat',date:'04/25',routes:{BF:25,BR:31,DI:26,BD:26},staff:{BF:27,BR:36,DI:29,BD:29}},
+    // WK18 not yet scheduled
+    {day:'Sun',date:'04/26',routes:{BF:22,BR:27,DI:25,BD:25},staff:{BF:0,BR:0,DI:0,BD:0}},
+    {day:'Mon',date:'04/27',routes:{BF:25,BR:27,DI:26,BD:26},staff:{BF:0,BR:0,DI:0,BD:0}},
   ]);
   const wrap=document.getElementById('spark16');
   if(wrap&&!wrap.children.length){
@@ -481,38 +482,62 @@ function buildFallbackGrid(){
 
 async function loadStaffing(){
   try {
-    const r=await fetch(pubUrl('STAFFING') + '&t=' + Date.now(), {cache:'no-store'});
-    const text=await r.text();
-    if(text.trim().startsWith('<')) throw new Error('not published');
-    const rows=parseCSV(text);
-    const hi=rows.findIndex(r=>r.some(c=>/day|date/i.test(c)));
-    if(hi===-1) throw new Error('no header');
-    const headers=rows[hi];
-    const ci=n=>headers.findIndex(h=>h.toLowerCase().includes(n.toLowerCase()));
-    const cDay=ci('day'),cDate=ci('date');
-    const cBFst=ci('breakfast (staff)'),cBRst=ci('brunch (staff)'),cDIst=ci('dinner (staff)'),cBDst=ci('bedtime (staff)');
-    const cBFrt=ci('breakfast (routes)'),cBRrt=ci('brunch (routes)'),cDIrt=ci('dinner (routes)'),cBDrt=ci('bedtime (routes)');
-    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const dataRows=rows.slice(hi+1).filter(r=>r[cDay]&&days.includes(r[cDay]));
-    if(!dataRows.length) throw new Error('no data');
-    renderShiftGrid(dataRows.slice(0,14).map(r=>({
-      day:r[cDay],date:r[cDate],
-      routes:{BF:parseInt(r[cBFrt])||0,BR:parseInt(r[cBRrt])||0,DI:parseInt(r[cDIrt])||0,BD:parseInt(r[cBDrt])||0},
-      staff:{BF:parseInt(r[cBFst])||0,BR:parseInt(r[cBRst])||0,DI:parseInt(r[cDIst])||0,BD:parseInt(r[cBDst])||0}
-    })));
-    document.getElementById('sheet-status').style.color='var(--teal)';
-    document.getElementById('sheet-status').textContent='✓ Sheet live · '+new Date().toLocaleTimeString();
-  } catch(e){ buildFallbackGrid(); document.getElementById('sheet-status').textContent='⚠ Sheet offline — showing last known data'; }
+    const r = await fetch(CAL_API_URL.replace(/\?.*$/, '') + '?type=staffing&t=' + Date.now(), {cache:'no-store'});
+    const rows = await r.json();
+    if (!Array.isArray(rows)) throw new Error('bad data');
+    
+    // Group by date: {date: {routes: {BF,BR,DI,BD}, staff: {...}}, day}
+    const byDate = {};
+    rows.forEach(row => {
+      if (!byDate[row.date]) byDate[row.date] = {day: row.day, date: row.date, routes: {BF:0,BR:0,DI:0,BD:0}, staff: {BF:0,BR:0,DI:0,BD:0}};
+      let k = null;
+      const s = row.shift;
+      if (/breakfast|BF/i.test(s)) k = 'BF';
+      else if (/brunch|BR/i.test(s)) k = 'BR';
+      else if (/dinner|DI/i.test(s)) k = 'DI';
+      else if (/bedtime|evening|BD/i.test(s)) k = 'BD';
+      if (k) { byDate[row.date].routes[k] = row.routes; byDate[row.date].staff[k] = row.staff; }
+    });
+    
+    // Filter to today forward, take 7 days
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const daysArr = Object.values(byDate)
+      .filter(d => {
+        const [mm, dd] = d.date.split('/').map(Number);
+        const dt = new Date(today.getFullYear(), mm-1, dd);
+        return dt >= today;
+      })
+      .sort((a,b) => {
+        const [am,ad] = a.date.split('/').map(Number), [bm,bd] = b.date.split('/').map(Number);
+        return (am*100+ad) - (bm*100+bd);
+      })
+      .slice(0, 7);
+    
+    if (daysArr.length === 0) { buildFallbackGrid(); return; }
+    renderShiftGrid(daysArr);
+    const el = document.getElementById('sheet-status');
+    if (el) { el.style.color = 'var(--teal)'; el.textContent = '✓ Live · ' + new Date().toLocaleTimeString(); }
+  } catch(e) {
+    buildFallbackGrid();
+    const el = document.getElementById('sheet-status');
+    if (el) el.textContent = '⚠ Sheet offline — showing last known data';
+  }
 }
 
-function loadFleet(){
-  // Fleet data — updated each session via "refresh my dashboard data"
-  const total=36, avail=27, down=9, pct=75, actionReq=0;
-  document.getElementById('fleet-total').textContent=total;
-  document.getElementById('fleet-down').textContent=down;
-  document.getElementById('fleet-bar-fill').style.width=pct+'%';
-  document.getElementById('fleet-bar-fill').style.background=pct>90?'var(--teal)':pct>75?'var(--amber)':'var(--red)';
-  document.getElementById('fleet-list').textContent=pct+'% available · '+avail+' operational · '+actionReq+' need attention';
+async function loadFleet(){
+  try {
+    const r = await fetch(CAL_API_URL.replace(/\?.*$/, '') + '?type=fleet&t=' + Date.now(), {cache:'no-store'});
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('fleet-total').textContent = d.total;
+    document.getElementById('fleet-down').textContent = d.unavailable;
+    document.getElementById('fleet-bar-fill').style.width = d.pct + '%';
+    document.getElementById('fleet-bar-fill').style.background = d.pct > 90 ? 'var(--teal)' : d.pct > 75 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('fleet-list').textContent = d.pct + '% available · ' + d.available + ' operational · ' + d.tickets + ' tickets open';
+  } catch(e) {
+    document.getElementById('fleet-list').textContent = 'Fleet offline — ' + e.message;
+  }
 }
 
 // Boot
