@@ -262,6 +262,40 @@ html,body{background:var(--bg);color:var(--w1);font-family:var(--font);font-size
           </tbody>
         </table>
       </div>
+      <div class="week-divider"></div>
+      <!-- WK19 -->
+      <div class="routes-week">
+        <div class="routes-week-lbl">WK19 <span style="color:var(--w4);font-weight:300">May 3–9</span> <span class="chip chip-amber">Target 100</span></div>
+        <table class="tbl">
+          <thead><tr><th>Day</th><th>Date</th><th class="tv">BF</th><th class="av">Brunch</th><th class="pv">Din</th><th class="bv">Eve</th><th>Tot</th></tr></thead>
+          <tbody>
+            <tr><td class="av">Sun</td><td>05/03</td><td class="tv">26</td><td class="av">28</td><td class="pv">23</td><td class="bv">24</td><td class="tv">101</td></tr>
+            <tr><td class="av">Mon</td><td>05/04</td><td class="tv">25</td><td class="av">28</td><td class="pv">23</td><td class="bv">22</td><td class="rv">98</td></tr>
+            <tr><td class="av">Tue</td><td>05/05</td><td class="tv">24</td><td class="av">28</td><td class="pv">24</td><td class="bv">22</td><td class="rv">98</td></tr>
+            <tr><td class="av">Wed</td><td>05/06</td><td class="tv">25</td><td class="av">27</td><td class="pv">28</td><td class="bv">24</td><td class="tv">104</td></tr>
+            <tr><td class="av">Thu</td><td>05/07</td><td class="tv">23</td><td class="av">29</td><td class="pv">21</td><td class="bv">25</td><td class="rv">98</td></tr>
+            <tr><td class="av">Fri</td><td>05/08</td><td class="tv">25</td><td class="av">29</td><td class="pv">22</td><td class="bv">24</td><td class="tv">100</td></tr>
+            <tr><td class="av">Sat</td><td>05/09</td><td class="tv">27</td><td class="av">31</td><td class="pv">21</td><td class="bv">28</td><td class="tv">107</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="week-divider"></div>
+      <!-- WK20 -->
+      <div class="routes-week">
+        <div class="routes-week-lbl">WK20 <span style="color:var(--w4);font-weight:300">May 10–16</span> <span class="chip chip-amber">Target 100</span></div>
+        <table class="tbl">
+          <thead><tr><th>Day</th><th>Date</th><th class="tv">BF</th><th class="av">Brunch</th><th class="pv">Din</th><th class="bv">Eve</th><th>Tot</th></tr></thead>
+          <tbody>
+            <tr><td class="av">Sun</td><td>05/10</td><td class="tv">26</td><td class="av">28</td><td class="pv">23</td><td class="bv">24</td><td class="tv">101</td></tr>
+            <tr><td class="av">Mon</td><td>05/11</td><td class="tv">25</td><td class="av">28</td><td class="pv">23</td><td class="bv">22</td><td class="rv">98</td></tr>
+            <tr><td class="av">Tue</td><td>05/12</td><td class="tv">24</td><td class="av">28</td><td class="pv">24</td><td class="bv">22</td><td class="rv">98</td></tr>
+            <tr><td class="av">Wed</td><td>05/13</td><td class="tv">25</td><td class="av">27</td><td class="pv">28</td><td class="bv">24</td><td class="tv">104</td></tr>
+            <tr><td class="av">Thu</td><td>05/14</td><td class="tv">23</td><td class="av">29</td><td class="pv">21</td><td class="bv">25</td><td class="rv">98</td></tr>
+            <tr><td class="av">Fri</td><td>05/15</td><td class="tv">25</td><td class="av">29</td><td class="pv">22</td><td class="bv">24</td><td class="tv">100</td></tr>
+            <tr><td class="av">Sat</td><td>05/16</td><td class="tv">27</td><td class="av">31</td><td class="pv">21</td><td class="bv">28</td><td class="tv">107</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -297,15 +331,14 @@ function hardRefresh() {
 function updateSyncIndicator() {
   const el = document.getElementById('last-sync');
   if (!el) return;
-  const ageMs = Date.now() - BUILD_MS;
+  // Prefer API-reported data freshness over HTML build time
+  const ts = window.__dataLastUpdated || BUILD_MS;
+  const ageMs = Date.now() - ts;
   const ageHours = ageMs / (1000 * 60 * 60);
-  const buildDate = new Date(BUILD_MS);
-  const buildStr = buildDate.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
-  el.textContent = 'DATA: ' + buildStr;
-  if (ageHours > 20) {
-    el.classList.add('stale');
-    el.textContent = '⚠ STALE · ' + buildStr;
-  }
+  const dataDate = new Date(ts);
+  const dataStr = dataDate.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+  el.textContent = 'DATA: ' + dataStr;
+  if (ageHours > 20) el.classList.add('stale'); else el.classList.remove('stale');
 }
 updateSyncIndicator();
 
@@ -529,6 +562,13 @@ async function loadFleet(){
   try {
     const r = await fetch(CAL_API_URL.replace(/\?.*$/, '') + '?type=fleet&t=' + Date.now(), {cache:'no-store'});
     const d = await r.json();
+    if (d.lastUpdated) {
+      const parsed = new Date(d.lastUpdated).getTime();
+      if (!isNaN(parsed)) {
+        window.__dataLastUpdated = parsed;
+        if (typeof updateSyncIndicator === 'function') updateSyncIndicator();
+      }
+    }
     if (d.error) throw new Error(d.error);
     document.getElementById('fleet-total').textContent = d.total;
     document.getElementById('fleet-down').textContent = d.unavailable;
